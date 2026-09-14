@@ -12,3 +12,4 @@ extern Model* modelSephirothicModulator;
 extern Model* modelCosmicClock;
 extern Model* modelCoronalAnnihilator;
 extern Model* modelLitanyEngine;
+extern Model* modelSyzygy;

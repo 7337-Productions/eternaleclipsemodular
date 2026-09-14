@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.10.0 (2026-09-08)
+
+- New module: Syzygy — orbital note generator reinterpreting Antonio
+  Blanca's ABreakpoint 2 Lemur template. A string winds through a field
+  with sixteen beads on it; speeds along the string are powers of the
+  golden ratio and it resets to a golden-angle sunflower, so it winds
+  into spirals, polygons and stars that never repeat. Five TASK figures
+  (orbit, Lissajous at 1:phi, rose with pi petals, five-fold star,
+  sweep), a MODE switch (CHAIN joins the beads in order, STRING draws
+  the curve between them), a MASS physics layer (spring to the string, friction, wall
+  bounce, mouse throw), an angular trigger ARC, a shaped pitch
+  distribution quantized to fourteen scales, per-bead enables, a seeded
+  random vector, and eight CV/GATE pairs allocated Ansible-style
+  (round-robin with steal). Built as a Cosmic Clock companion: every
+  parameter except SCALE, ROOT and EPOCH is a bare -5..+5 V input, and
+  EPOCH samples those inputs once per 1..21 laps (or clocks) and glides
+  between readings so fast modulation becomes slow evolution.
+- Cosmic Clock: fix a crash in the chart readout. The strongest-aspect
+  fields were read on the UI thread while the audio thread rewrote them,
+  and a torn read could index a body name at -1. They are now published
+  as one atomic word and bounds-checked before formatting.
+
 ## 2.9.2 (2026-08-26)
 
 - Fix the Linux Library build: glibc defines major()/minor() as macros,

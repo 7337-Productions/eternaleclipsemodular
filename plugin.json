@@ -1,7 +1,7 @@
 {
   "slug": "EternalEclipseModular",
   "name": "Eternal Eclipse Modular",
-  "version": "2.9.2",
+  "version": "2.10.0",
   "license": "GPL-3.0-or-later",
   "pluginUrl": "https://churchoftheeternaleclipse.com/the-mirror/",
   "brand": "Eternal Eclipse",
@@ -61,6 +61,12 @@
       "name": "Litany Engine",
       "description": "Looping sample player with an onboard litany of loops and a focused granular engine — or load your own sample folder: through-zero varispeed, grain size from whole-loop down to 15 ms, morphing overlap, scan and texture spray; stereo companion to the Coronal Annihilator's external input.",
       "tags": ["Sampler", "Granular"]
+    },
+    {
+      "slug": "Syzygy",
+      "name": "Syzygy",
+      "description": "Orbital note generator — sixteen beads joined by a line drift around a field at speeds in powers of the golden ratio from a golden-angle sunflower, through five task figures (orbit, Lissajous, rose, star, sweep), with mass physics, wall bounce and mouse throw, an angular trigger arc, a fourteen-scale quantizer, and eight CV/gate pairs allocated Ansible-style; every parameter is a bare ±5 V input read once per EPOCH lap, made for Cosmic Clock.",
+      "tags": ["Sequencer", "Visual"]
     }
   ]
 }

@@ -160,6 +160,50 @@ EOC emits a pulse each time the tape wraps. Loops are decoded once on a backgrou
 thread and shared across instances. Stereo out at ±5 V — patch it into the Coronal
 Annihilator's external input to run the litany through a neural amp model.
 
+### Syzygy
+
+![Syzygy](docs/images/Syzygy.png)
+
+Orbital note generator, a reinterpretation of Antonio Blanca's ABreakpoint 2
+template for the Jazzmutant Lemur. Sixteen beads drift around the field and a
+line joins them in order, the way the Lemur's Breakpoint object drew its
+points; MODE swaps that CHAIN for the STRING, the curve the orbit law traces
+between the beads. Every bead has its own speed, a power of the golden ratio, and its own
+radius, so from the sunflower it is RESET to (beads spaced by the golden angle
+on a Fermat spiral) the line slowly winds into spirals, folds through
+triangles, pentagons and stars, and unwinds again, never repeating. TASK steps
+the figure the beads travel: ORBIT, LISSAJOUS (X and Y phases at their own
+rates, 1:phi by default), ROSE with pi petals per turn, a five-fold STAR, and
+SWEEP. X RATE and Y RATE set the two phase rates, SPREAD the speed spread, and
+WARP bends the radius law from a tight centre through the sunflower to an
+outer ring. A bead sounds while it sits inside the trigger ARC, a sector of
+the field whose start angle and WIDTH are yours. Every bead is a mass: its
+orbit is only an attractor, and MASS loosens the tether from rigid tracking to
+free flight bouncing off the walls. Grab a bead with the mouse and throw it; a
+click without a drag takes it in or out of the pattern, as do the sixteen
+BEADS buttons. Each bead carries a pitch from a shaped distribution (RANGE up
+to eight octaves, P.SHAPE, P.OFFS) quantized to one of fourteen scales with
+SCALE and ROOT. RAND
+throws a new random vector (per-bead phase, speed and pitch jitter plus a
+fresh enable pattern); the module menu clears it and holds the amplitude
+sliders.
+
+Notes leave through eight CV/GATE pairs allocated the way a Monome Ansible
+handles MIDI poly mode: every new note rotates to the next pair and steals it,
+and a release only drops the gate of the pair that still holds that bead.
+V/OCT transposes every output. Syzygy is built as a companion to the Cosmic
+Clock and to the slow passage of time. Apart from SCALE, ROOT and EPOCH it has
+no knobs: every parameter is a bare input where -5 to +5 V sweeps the full
+range and an unpatched jack sits at a tuned default. EPOCH is the lap divider:
+a lap is 1, 2, 3, 5, 8, 13 or 21 base laps of 64 seconds, or that many CLOCK
+pulses when a clock is patched, and once every lap Syzygy samples its inputs
+and glides to the new values across the next one, so a fast planetary wave
+becomes a deliberate walk that changes with each lap while a slow one is
+followed; plugging or unplugging a cable takes effect at once. LIVE runs at
+the base lap with no sampling. RATE shifts the lap in
+octaves, RESET returns the beads to the sunflower without firing a chord, and
+RUN holds everything.
+
 All Eternal Eclipse audio modules are stereo.
 
 ## Building

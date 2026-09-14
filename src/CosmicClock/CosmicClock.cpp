@@ -1,3 +1,4 @@
+#include <atomic>
 #include <chrono>
 #include "plugin.hpp"
 #include "EclipseWidgets.hpp"
@@ -127,8 +128,11 @@ struct CosmicClock : Module {
 	float lonDisplay[NUM_BODIES] = {};
 	float dispWeight[NUM_BODIES] = {};
 	int sunSign = 0;
-	int strongA = -1, strongB = -1, strongType = -1;
-	float strongDelta = 0.f;
+	// Strongest aspect for the readout, packed into one word so the UI thread
+	// never sees a half-written (body, body, type) triple: bit 31 = valid,
+	// bits 16-23 body A, bits 8-15 body B, bits 0-7 aspect type.
+	std::atomic<uint32_t> strongPacked{0};
+	std::atomic<float> strongDelta{0.f};
 
 	dsp::ClockDivider skyDivider;
 
@@ -307,7 +311,8 @@ struct CosmicClock : Module {
 				target[p] = 0.4f;
 			numActive = 0;
 			float strongestI = 0.f;
-			strongA = strongB = strongType = -1;
+			int strongA = -1, strongB = -1, strongType = -1;
+			float strongDeltaNew = 0.f;
 			for (int a = 0; a < NUM_BODIES; a++) {
 				for (int b = a + 1; b < NUM_BODIES; b++) {
 					double sepDeg = std::fabs(std::remainder(lon[a] - lon[b], 2.0 * M_PI)) / orbits::DEG;
@@ -326,11 +331,16 @@ struct CosmicClock : Module {
 							strongA = a;
 							strongB = b;
 							strongType = k;
-							strongDelta = (float)delta;
+							strongDeltaNew = (float)delta;
 						}
 					}
 				}
 			}
+
+			strongDelta.store(strongDeltaNew, std::memory_order_relaxed);
+			strongPacked.store(strongType < 0 ? 0u
+				: (1u << 31) | ((uint32_t)strongA << 16) | ((uint32_t)strongB << 8) | (uint32_t)strongType,
+				std::memory_order_relaxed);
 
 			// Smooth mix weights (~100 ms) so chord blooms don't zipper MAIN
 			float alpha = 1.f - std::exp(-(float)dt / 0.1f);
@@ -767,11 +777,13 @@ struct ChartReadout : TransparentWidget {
 			int secs = (int)(module->simUnix - days * 86400.0);
 			line1 = string::f("%d-%02u-%02u", y, m, d);
 			line2 = string::f("%02d:%02d UTC", secs / 3600, (secs / 60) % 60);
-			if (module->strongType >= 0) {
+			uint32_t packed = module->strongPacked.load(std::memory_order_relaxed);
+			int sA = (packed >> 16) & 0xFF, sB = (packed >> 8) & 0xFF, sT = packed & 0xFF;
+			if ((packed & (1u << 31)) && sA < NUM_BODIES && sB < NUM_BODIES && sT < NUM_ASPECTS) {
 				line3 = string::f("%s %s %s %.1f\xC2\xB0",
-					BODY_NAMES[module->strongA], ASPECT_NAMES[module->strongType],
-					BODY_NAMES[module->strongB], module->strongDelta);
-				c3 = ASPECT_COLOR[module->strongType];
+					BODY_NAMES[sA], ASPECT_NAMES[sT], BODY_NAMES[sB],
+					module->strongDelta.load(std::memory_order_relaxed));
+				c3 = ASPECT_COLOR[sT];
 			}
 			else {
 				line3 = "-";
