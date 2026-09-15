@@ -204,6 +204,16 @@ the base lap with no sampling. RATE shifts the lap in
 octaves, RESET returns the beads to the sunflower without firing a chord, and
 RUN holds everything.
 
+### Eternal Eclipse
+
+![Eternal Eclipse](docs/images/EternalEclipse.png)
+
+A resizable blank panel bearing the Eternal Eclipse corona. Drag either edge
+to set the width from 3 HP upward; it snaps to the HP grid and the corona
+scales to fit. The bottom brand mark shows the full wordmark from 10 HP and
+collapses to the eclipse sigil on narrower widths. The width is saved with the
+patch. No inputs, no outputs, no controls.
+
 All Eternal Eclipse audio modules are stereo.
 
 ## Building

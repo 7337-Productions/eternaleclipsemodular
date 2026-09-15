@@ -17,6 +17,10 @@
   parameter except SCALE, ROOT and EPOCH is a bare -5..+5 V input, and
   EPOCH samples those inputs once per 1..21 laps (or clocks) and glides
   between readings so fast modulation becomes slow evolution.
+- New module: Eternal Eclipse — a resizable blank panel bearing the EEM
+  corona. Drag either edge to set the width from 3 HP upward; the corona
+  scales to fit and the bottom brand mark collapses to the sigil on narrow
+  widths. The width is saved with the patch.
 - Cosmic Clock: fix a crash in the chart readout. The strongest-aspect
   fields were read on the UI thread while the audio thread rewrote them,
   and a torn read could index a body name at -1. They are now published
