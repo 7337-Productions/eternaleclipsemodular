@@ -9,9 +9,9 @@
   "authorEmail": "themagicianreversedband@gmail.com",
   "authorUrl": "https://churchoftheeternaleclipse.com",
   "donateUrl": "https://www.patreon.com/TheMagicianReversed",
-  "manualUrl": "https://github.com/7337Productions/eternaleclipsemodular#readme",
-  "sourceUrl": "https://github.com/7337Productions/eternaleclipsemodular",
-  "changelogUrl": "https://github.com/7337Productions/eternaleclipsemodular/blob/main/CHANGELOG.md",
+  "manualUrl": "https://github.com/7337-Productions/eternaleclipsemodular#readme",
+  "sourceUrl": "https://github.com/7337-Productions/eternaleclipsemodular",
+  "changelogUrl": "https://github.com/7337-Productions/eternaleclipsemodular/blob/main/CHANGELOG.md",
   "minRackVersion": "2.4.0",
   "modules": [
     {
