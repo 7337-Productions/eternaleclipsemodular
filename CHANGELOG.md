@@ -1,5 +1,28 @@
 # Changelog
 
+## 2.10.1 (2026-09-24)
+
+- Syzygy: panel frames now carry the standard corner brackets (copper,
+  top-left and bottom-right) instead of four bright corners, and the
+  IN / CV / GATE bay headers use the cream label color like Cosmic
+  Clock's WAVE / EOC.
+- Syzygy: fix the EPOCH lap timing. The once-per-lap input sampling
+  was keyed to the X phase, which includes X RATE, so at the default
+  X RATE inputs were read every 1.618 laps and a clocked EPOCH 3 read
+  them every 4.85 pulses, never on a pulse. The lap now has its own
+  accumulator, resynced to the clock so a boundary lands exactly on
+  pulse EPOCH. The LAP readout and the sampling now agree.
+- Syzygy: a lap never runs shorter than half a second, so a very fast
+  clock drives the beads to that limit instead of scattering them.
+- Syzygy: NaN-safe clamp and finite guards on bead grab and throw.
+- Cosmic Clock: the patch-bay planet glyphs are drawn in the cream
+  label color instead of the dim ash.
+- Litany Engine: the onboard sample bank's decode thread is joined when
+  the last instance is removed, never at plugin unload, removing a
+  possible hang on quit under Windows.
+- README: the Syzygy section is rewritten, with a recommended starting
+  patch (Cosmic Clock MAIN EOC into CLOCK, EPOCH 3).
+
 ## 2.10.0 (2026-09-08)
 
 - New module: Syzygy — orbital note generator reinterpreting Antonio
