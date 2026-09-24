@@ -151,11 +151,26 @@ public:
 		return bank;
 	}
 
-	// Start the background decode (idempotent).
-	void ensureLoaded() {
+	// Each module instance retains the bank; the first starts the background
+	// decode, the last to go joins it (see release()).
+	void retain() {
+		users++;
 		std::call_once(loadOnce, [this] {
+			std::lock_guard<std::mutex> lock(loaderMutex);
 			loader = std::thread([this] { decodeAll(); });
 		});
+	}
+
+	// Join the decode thread while a module is still being torn down on the
+	// UI thread. Doing it here rather than in the static destructor matters:
+	// on Windows a std::thread::join() inside DLL unload / process exit can
+	// deadlock on the loader lock, which would leave Rack alive after Quit.
+	void release() {
+		if (--users > 0)
+			return;
+		std::lock_guard<std::mutex> lock(loaderMutex);
+		if (loader.joinable())
+			loader.join();
 	}
 
 	size_t count() const { return loops.size(); }
@@ -171,15 +186,19 @@ public:
 		return out;
 	}
 
+	// Static destruction (plugin unload): never join here. If the decode is
+	// somehow still running, let it go rather than block the process exit.
 	~SampleBank() {
 		if (loader.joinable())
-			loader.join();
+			loader.detach();
 	}
 
 private:
 	std::vector<std::unique_ptr<Loop>> loops;
 	std::thread loader;
+	std::mutex loaderMutex;
 	std::once_flag loadOnce;
+	std::atomic<int> users{0};
 
 	SampleBank() {
 		// Synchronous scan: names only, no decoding.

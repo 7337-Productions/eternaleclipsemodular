@@ -81,7 +81,7 @@ struct LitanyEngine : Module {
 		config(PARAMS_LEN, INPUTS_LEN, OUTPUTS_LEN, LIGHTS_LEN);
 
 		litany::SampleBank& bank = litany::SampleBank::get();
-		bank.ensureLoaded();
+		bank.retain();
 		loopNames = bank.names();
 		int count = (int)bank.count();
 		configParam<LoopQuantity>(LOOP_PARAM, 0.f, std::max(count - 1, 0), 0.f, "Loop");
@@ -202,6 +202,7 @@ struct LitanyEngine : Module {
 		delete pendingBank.exchange(NULL);
 		delete retiredBank.exchange(NULL);
 		delete activeBank;
+		litany::SampleBank::get().release();
 	}
 
 	void retire(litany::UserBank* b) {
