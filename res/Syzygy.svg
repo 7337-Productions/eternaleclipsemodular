@@ -27,23 +27,19 @@
 
   <!-- Middle column frame: points grid, transport, scale/root -->
   <rect x="113.0" y="16.0" width="33.00" height="106.50" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
-  <g fill="none" stroke="#ffc464" stroke-width="0.5">
-    <path d="M113.00,20.00 L113.00,16.00 L117.00,16.00"/>
-    <path d="M146.00,20.00 L146.00,16.00 L142.00,16.00"/>
-    <path d="M113.00,118.50 L113.00,122.50 L117.00,122.50"/>
-    <path d="M146.00,118.50 L146.00,122.50 L142.00,122.50"/>
-  </g>
   <line x1="116" y1="79.5" x2="143" y2="79.5" stroke="#382110" stroke-width="0.4"/>
 
   <!-- Patch bay frame: inputs | CV | GATE -->
   <rect x="149.5" y="16.0" width="51.00" height="106.50" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
-  <g fill="none" stroke="#ffc464" stroke-width="0.5">
-    <path d="M149.50,20.00 L149.50,16.00 L153.50,16.00"/>
-    <path d="M200.50,20.00 L200.50,16.00 L196.50,16.00"/>
-    <path d="M149.50,118.50 L149.50,122.50 L153.50,122.50"/>
-    <path d="M200.50,118.50 L200.50,122.50 L196.50,122.50"/>
-  </g>
   <line x1="174" y1="18.0" x2="174" y2="120.5" stroke="#382110" stroke-width="0.4"/>
+
+  <!-- Corner brackets (Church card motif) -->
+  <g fill="none" stroke="#cd762b" stroke-width="0.4" stroke-opacity="0.9">
+    <path d="M 113,18.4 L 113,16 L 115.4,16"/>
+    <path d="M 146,120.1 L 146,122.5 L 143.6,122.5"/>
+    <path d="M 149.5,18.4 L 149.5,16 L 151.9,16"/>
+    <path d="M 200.5,120.1 L 200.5,122.5 L 198.1,122.5"/>
+  </g>
 
   <!-- Brand mark, flush to the bottom edge: ETERNAL (eclipse sigil) ECLIPSE.
        Wordmark outlines from Poppins SemiBold (OFL), cap height 1.9mm. -->

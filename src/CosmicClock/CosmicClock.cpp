@@ -810,7 +810,7 @@ struct PlanetGlyphLabel : TransparentWidget {
 	int body = 0;
 
 	void draw(const DrawArgs& args) override {
-		drawPlanetGlyph(args.vg, body, box.size.div(2), mm2px(3.f), eclipse::DIM_COLOR);
+		drawPlanetGlyph(args.vg, body, box.size.div(2), mm2px(3.f), eclipse::LABEL_COLOR);
 	}
 };
 

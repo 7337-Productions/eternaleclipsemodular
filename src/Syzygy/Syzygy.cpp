@@ -83,6 +83,9 @@ struct Syzygy : Module {
 		0.f, -0.6942f, 0.f, 0.f, -5.f, -2.5f, 0.f, -1.25f, -2.65f, 0.f, 2.5f, 0.f, -5.f, 0.f
 	};
 	static constexpr int EPOCH_DIV[8] = {1, 1, 2, 3, 5, 8, 13, 21}; // index 0 = LIVE (x1, no sampling)
+	// Ceiling on the lap rate (laps per second) on either axis: a fast clock
+	// speeds the beads up to this limit instead of teleporting them
+	static constexpr float MAX_LAP_RATE = 2.f;
 
 	syzygy::OrbitField field;
 	syzygy::Params prm;
@@ -98,7 +101,14 @@ struct Syzygy : Module {
 	int clockCounter = 0;
 	int clockPeriod = 0;
 	bool clockSeen = false;
+	int clockPulses = 0;
+	int lastPulses = 0;
 	int blockCount = 0;
+
+	// The lap, in laps: the unit the input sampling is gated on. Advanced by
+	// the lap rate alone (never the X/Y rates); clocked, resynced to the pulse
+	// count so a boundary lands exactly on pulse EPOCH.
+	double lapPh = 0.0;
 
 	// Epoch sampler
 	float smpPrev[NUM_SAMPLED] = {};
@@ -109,7 +119,7 @@ struct Syzygy : Module {
 	double tSec = 0.0;
 	double epochStart = 0.0;
 	double epochDur = 0.0;
-	long lastLap = -1;
+	int64_t lastLap = -1;
 
 	// UI -> audio
 	std::atomic<float> ampX{1.f};
@@ -273,10 +283,10 @@ struct Syzygy : Module {
 			}
 		}
 		bool boundary = false;
-		long lap = (long)std::floor(field.phX);
-		if (lastLap < 0)
-			lastLap = lap;
-		else if (lap != lastLap) {
+		int64_t lap = (int64_t)std::floor(lapPh);
+		if (lastLap < 0 || lap < lastLap)
+			lastLap = lap; // first lap, or a clock resync stepped back
+		else if (lap > lastLap) {
 			lastLap = lap;
 			boundary = true;
 		}
@@ -310,6 +320,17 @@ struct Syzygy : Module {
 		bool clocked = inputs[CLOCK_INPUT].isConnected();
 		int epochIdx = clamp((int)params[EPOCH_PARAM].getValue(), 0, 7);
 		int div = EPOCH_DIV[epochIdx];
+
+		// Advance the lap (at last block's rate) before the inputs are sampled
+		if (clocked && clockPulses != lastPulses) {
+			lastPulses = clockPulses;
+			lapPh = (double)clockPulses * std::exp2(std::round(smpCur[S_RATE])) / div;
+		}
+		else {
+			if (!clocked)
+				lastPulses = 0;
+			lapPh += (double)prm.rate * dt;
+		}
 		sampleInputs(epochIdx == 0);
 
 		// A lap is EPOCH base laps (64 s each at RATE 0 V), or EPOCH clock pulses
@@ -320,6 +341,8 @@ struct Syzygy : Module {
 			prm.rate = (1.f / 64.f) / div * std::exp2(rateV);
 		prm.xRate = std::exp2(smpCur[S_XRATE]);
 		prm.yRate = std::exp2(smpCur[S_YRATE]);
+		float axisMax = std::fmax(1.f, std::fmax(prm.xRate, prm.yRate));
+		prm.rate = std::fmin(prm.rate, MAX_LAP_RATE / axisMax);
 		prm.spread = uni(smpCur[S_SPREAD]);
 		prm.shape = uni(smpCur[S_SHAPE]);
 		prm.mass = uni(smpCur[S_MASS]);
@@ -357,6 +380,8 @@ struct Syzygy : Module {
 			pendingReset = false;
 			pendingArm = false;
 			field.reset(prm);
+			lapPh = 0.0;
+			clockPulses = lastPulses = 0;
 			lastLap = -1;
 		}
 		else if (pendingArm) {
@@ -428,6 +453,7 @@ struct Syzygy : Module {
 					clockSeen = true;
 				}
 				clockCounter = 0;
+				clockPulses++;
 			}
 			if (clockCounter < (1 << 24))
 				clockCounter++;
@@ -435,6 +461,7 @@ struct Syzygy : Module {
 		else {
 			clockSeen = false;
 			clockCounter = 0;
+			clockPulses = 0;
 		}
 		bool rst = resetTrig.process(inputs[RESET_INPUT].getVoltage(), 0.1f, 1.f);
 		if (resetBtn.process(params[RESET_PARAM].getValue() > 0.5f))
@@ -836,9 +863,9 @@ struct SyzygyWidget : ModuleWidget {
 		addLabel(Vec(129.5f, 120.f), "EPOCH", eclipse::FINE_SIZE);
 
 		// ===== Bay =====
-		addLabel(Vec(161.f, 20.5f), "IN", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		addLabel(Vec(BAY_CV, 20.5f), "CV", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		addLabel(Vec(BAY_GATE, 20.5f), "GATE", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		addLabel(Vec(161.f, 20.5f), "IN");
+		addLabel(Vec(BAY_CV, 20.5f), "CV");
+		addLabel(Vec(BAY_GATE, 20.5f), "GATE");
 
 		addBayInput(BAY_IN_A, 0, "CLOCK", Syzygy::CLOCK_INPUT, module);
 		addBayInput(BAY_IN_A, 1, "RESET", Syzygy::RESET_INPUT, module);

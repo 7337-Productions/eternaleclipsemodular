@@ -37,8 +37,9 @@ inline float cubed(float v) {
 	return v * v * v;
 }
 
+// NaN-safe: a NaN lands on lo instead of passing through
 inline float clampf(float v, float lo, float hi) {
-	return v < lo ? lo : (v > hi ? hi : v);
+	return v > hi ? hi : (v >= lo ? v : lo);
 }
 
 // The original phaseTransform: a two-parameter cubic that spreads a value
@@ -313,8 +314,10 @@ struct OrbitField {
 
 	void hold(int i, float x, float y) {
 		held = i;
-		heldX = clampf(x, -1.f, 1.f);
-		heldY = clampf(y, -1.f, 1.f);
+		if (std::isfinite(x) && std::isfinite(y)) {
+			heldX = clampf(x, -1.f, 1.f);
+			heldY = clampf(y, -1.f, 1.f);
+		}
 	}
 
 	// Let go of the held bead with a velocity (field units per second)
@@ -323,8 +326,8 @@ struct OrbitField {
 			held = -1;
 		if (i < 0 || i >= N)
 			return;
-		pts[i].vx = clampf(vx, -20.f, 20.f);
-		pts[i].vy = clampf(vy, -20.f, 20.f);
+		pts[i].vx = std::isfinite(vx) ? clampf(vx, -20.f, 20.f) : 0.f;
+		pts[i].vy = std::isfinite(vy) ? clampf(vy, -20.f, 20.f) : 0.f;
 	}
 
 	// Inside the trigger arc: a sector from arcStart spanning arcWidth (CCW)

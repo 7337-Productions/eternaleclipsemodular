@@ -164,45 +164,50 @@ Annihilator's external input to run the litany through a neural amp model.
 
 ![Syzygy](docs/images/Syzygy.png)
 
-Orbital note generator, a reinterpretation of Antonio Blanca's ABreakpoint 2
-template for the Jazzmutant Lemur. Sixteen beads drift around the field and a
-line joins them in order, the way the Lemur's Breakpoint object drew its
-points; MODE swaps that CHAIN for the STRING, the curve the orbit law traces
-between the beads. Every bead has its own speed, a power of the golden ratio, and its own
-radius, so from the sunflower it is RESET to (beads spaced by the golden angle
-on a Fermat spiral) the line slowly winds into spirals, folds through
-triangles, pentagons and stars, and unwinds again, never repeating. TASK steps
-the figure the beads travel: ORBIT, LISSAJOUS (X and Y phases at their own
-rates, 1:phi by default), ROSE with pi petals per turn, a five-fold STAR, and
-SWEEP. X RATE and Y RATE set the two phase rates, SPREAD the speed spread, and
-WARP bends the radius law from a tight centre through the sunflower to an
-outer ring. A bead sounds while it sits inside the trigger ARC, a sector of
-the field whose start angle and WIDTH are yours. Every bead is a mass: its
-orbit is only an attractor, and MASS loosens the tether from rigid tracking to
-free flight bouncing off the walls. Grab a bead with the mouse and throw it; a
-click without a drag takes it in or out of the pattern, as do the sixteen
-BEADS buttons. Each bead carries a pitch from a shaped distribution (RANGE up
-to eight octaves, P.SHAPE, P.OFFS) quantized to one of fourteen scales with
-SCALE and ROOT. RAND
-throws a new random vector (per-bead phase, speed and pitch jitter plus a
-fresh enable pattern); the module menu clears it and holds the amplitude
-sliders.
+Orbital note generator, built as a companion to the Cosmic Clock. It reinterprets
+Antonio Blanca's ABreakpoint 2 template for the Jazzmutant Lemur: sixteen beads
+orbit a square field, and a line joins them the way the Lemur's Breakpoint object
+drew its points. MODE picks the line. CHAIN connects the beads in order; STRING draws
+the curve the orbit law traces between them. RESET lays the beads on a sunflower (a
+Fermat spiral, one bead per golden angle), and from there each bead moves at its own
+speed, a power of the golden ratio, on its own radius. Because those speeds never
+divide evenly, the line winds into spirals, folds through triangles, pentagons and
+stars, and unwinds again without ever repeating. TASK chooses the figure the beads
+trace: ORBIT, LISSAJOUS (X and Y at independent rates, 1:phi by default), ROSE with
+pi petals per turn, a five-fold STAR, or SWEEP. X RATE and Y RATE set those two
+rates, SPREAD widens or narrows the range of bead speeds, and WARP bends the radius
+law from a tight cluster at the centre, through the sunflower, out to a ring.
 
-Notes leave through eight CV/GATE pairs allocated the way a Monome Ansible
-handles MIDI poly mode: every new note rotates to the next pair and steals it,
-and a release only drops the gate of the pair that still holds that bead.
-V/OCT transposes every output. Syzygy is built as a companion to the Cosmic
-Clock and to the slow passage of time. Apart from SCALE, ROOT and EPOCH it has
-no knobs: every parameter is a bare input where -5 to +5 V sweeps the full
-range and an unpatched jack sits at a tuned default. EPOCH is the lap divider:
-a lap is 1, 2, 3, 5, 8, 13 or 21 base laps of 64 seconds, or that many CLOCK
-pulses when a clock is patched, and once every lap Syzygy samples its inputs
-and glides to the new values across the next one, so a fast planetary wave
-becomes a deliberate walk that changes with each lap while a slow one is
-followed; plugging or unplugging a cable takes effect at once. LIVE runs at
-the base lap with no sampling. RATE shifts the lap in
-octaves, RESET returns the beads to the sunflower without firing a chord, and
-RUN holds everything.
+The orbit is only an attractor. Every bead is a mass on a tether, and MASS loosens
+that tether from rigid tracking to free flight that bounces off the walls. Drag a
+bead with the mouse to throw it. A click without a drag takes the bead out of the
+pattern or puts it back, as do the sixteen BEADS buttons. The field's X and Y
+amplitude sliders live in the module menu.
+
+A bead sounds while it sits inside the trigger arc, a sector of the field: ARC sets
+where the sector begins and WIDTH how far it extends, from a sliver to the whole
+circle. Each bead carries a pitch drawn from a shaped distribution (RANGE from
+unison to eight octaves, P.SHAPE, P.OFFS) and quantized by SCALE, with fourteen
+scales, and ROOT. RAND rolls a new random vector: per-bead phase, speed and pitch
+jitter plus a fresh enable pattern. The menu clears it. Notes leave through eight
+CV/GATE pairs allocated the way a Monome Ansible handles MIDI poly mode: each new
+note takes the next pair in rotation and steals it if occupied, and a bead's release
+drops the gate only on the pair that still holds it. V/OCT transposes every output.
+
+Apart from SCALE, ROOT and EPOCH, Syzygy has no knobs. Every other parameter is a
+bare input where -5 to +5 V sweeps the full range and an unpatched jack rests at a
+tuned default, so the Cosmic Clock's waves drive it directly. Its unit of time is the
+lap, 64 seconds at RATE 0 V, and RATE shifts that in octaves. EPOCH stretches a lap
+to 1, 2, 3, 5, 8, 13 or 21 base laps, or to that many CLOCK pulses when a clock is
+patched (we recommend starting with the Main EOC output from Cosmic Clock patched
+into the Syzygy CLOCK input and with EPOCH knob set at 3 to get oriented and
+experiment from there). A lap never runs shorter than half a second, so a very fast
+clock drives the beads up to that limit rather than scattering them. Once per lap
+Syzygy samples its inputs and glides to the new values over the lap that follows,
+so a fast planetary wave becomes one deliberate step per lap while a slow one is
+simply followed. Patching or unpatching a cable takes effect at once. LIVE, the
+first EPOCH position, runs at the base lap with no sampling. RESET returns the
+beads to the sunflower without firing a chord, and RUN holds everything in place.
 
 ### Eternal Eclipse
 
