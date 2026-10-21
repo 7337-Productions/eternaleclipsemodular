@@ -214,10 +214,11 @@ struct VesperSwarm : Module {
 	}
 };
 
-// Panel geometry (mm). The star is drawn in the SVG; the singers' toggles sit
-// on its points and the display breathes in its centre.
+// Panel geometry (mm). The star of Ishtar is drawn in the SVG; the singers'
+// toggles sit just beyond its points and the display breathes in its heart.
 static constexpr float STAR_X = 4.f, STAR_Y = 16.f, STAR_W = 100.f, STAR_H = 106.5f;
-static constexpr float STAR_CX = 54.f, STAR_CY = 69.25f, STAR_R = 42.f;
+static constexpr float STAR_CX = 54.f, STAR_CY = 69.25f, STAR_R = 40.f;
+static constexpr float BUTTON_R = 45.5f;
 
 static Vec starPoint(int i, float r) {
 	float a = -0.5f * (float)M_PI + (float)i * 0.25f * (float)M_PI;
@@ -249,14 +250,14 @@ struct StarDisplay : TransparentWidget {
 		nvgScissor(args.vg, 0, 0, box.size.x, box.size.y);
 		Vec c = mm2px(Vec(STAR_CX - STAR_X, STAR_CY - STAR_Y));
 
-		// Rays toward the singing voices
+		// Rays along the points of the singing voices
 		nvgStrokeWidth(args.vg, mm2px(0.8f));
 		nvgLineCap(args.vg, NVG_ROUND);
 		for (int i = 0; i < VOICES; i++) {
 			if (!((mask >> i) & 1u))
 				continue;
-			Vec p0 = mm2px(starPoint(i, 8.f).minus(Vec(STAR_X, STAR_Y)));
-			Vec p1 = mm2px(starPoint(i, STAR_R - 6.f).minus(Vec(STAR_X, STAR_Y)));
+			Vec p0 = mm2px(starPoint(i, 13.f).minus(Vec(STAR_X, STAR_Y)));
+			Vec p1 = mm2px(starPoint(i, STAR_R - 3.f).minus(Vec(STAR_X, STAR_Y)));
 			nvgStrokeColor(args.vg, nvgRGBAf(1.f, 0.77f, 0.39f, 0.08f + 0.7f * level[i]));
 			nvgBeginPath(args.vg);
 			nvgMoveTo(args.vg, p0.x, p0.y);
@@ -264,9 +265,9 @@ struct StarDisplay : TransparentWidget {
 			nvgStroke(args.vg);
 		}
 
-		// Centre glow breathing with the envelope
-		float inner = mm2px(7.f);
-		float outer = mm2px(7.f + 4.f + 16.f * env);
+		// Glow around the bullseye, breathing with the envelope
+		float inner = mm2px(12.f);
+		float outer = mm2px(12.f + 3.f + 14.f * env);
 		float alpha = 0.08f + 0.45f * env;
 		NVGpaint paint = nvgRadialGradient(args.vg, c.x, c.y, inner, outer,
 			nvgRGBAf(1.f, 0.77f, 0.39f, alpha), nvgRGBAf(1.f, 0.77f, 0.39f, 0.f));
@@ -329,7 +330,7 @@ struct VesperSwarmWidget : ModuleWidget {
 		addChild(display);
 		for (int i = 0; i < VOICES; i++)
 			addParam(createLightParamCentered<VCVLightBezelLatch<YellowLight>>(
-				mm2px(starPoint(i, STAR_R)), module, VesperSwarm::VOICE_PARAMS + i, VesperSwarm::VOICE_LIGHTS + i));
+				mm2px(starPoint(i, BUTTON_R)), module, VesperSwarm::VOICE_PARAMS + i, VesperSwarm::VOICE_LIGHTS + i));
 
 		// ===== Controls =====
 		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(120.5f, 31.f)), module, VesperSwarm::PITCH_PARAM));
