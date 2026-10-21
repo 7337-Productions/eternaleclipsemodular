@@ -69,6 +69,12 @@
       "tags": ["Sequencer", "Visual"]
     },
     {
+      "slug": "VesperSwarm",
+      "name": "Vesper Swarm",
+      "description": "Eight-voice formant choir in the shape of the Swarmatron — one PITCH and one SWARM fan eight soprano singers from a few cents apart into a two-octave cluster or whole-number harmonics, each with her own vocal tract, vibrato and stereo place; VOWEL morphs A E I O U, BREATH adds air, through a 4-pole lowpass and a gate-driven ADSR that drones unpatched. Every knob has a CV jack; the singers stand on the points of an eight-pointed star and a click silences or wakes one.",
+      "tags": ["Synth voice", "Oscillator", "Filter", "Envelope generator"]
+    },
+    {
       "slug": "EternalEclipse",
       "name": "Eternal Eclipse",
       "description": "Resizable blank panel bearing the Eternal Eclipse corona. Drag either edge to set the width from 3 HP upward; the corona scales to fit.",

@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+- New module: Vesper Swarm — eight-voice formant choir in the shape of
+  the Dewanatron Swarmatron. Eight soprano singers, each a band-limited
+  glottal pulse through a five-formant filter bank with her own vocal
+  tract, vibrato and stereo place, share one PITCH; SWARM fans them from
+  a few cents apart into a two-octave cluster, or into whole-number
+  harmonics with the menu's Harmonic law. VOWEL morphs A E I O U,
+  BREATH adds air, then a saturating 4-pole lowpass and a gate-driven
+  ADSR that drones unpatched. GLIDE for ribbon glissandi, V/OCT plus a
+  CV jack for every knob. The singers stand on the points of an
+  eight-pointed star; a click silences or wakes one.
+
 ## 2.10.1 (2026-09-24)
 
 - Syzygy: panel frames now carry the standard corner brackets (copper,
