@@ -209,6 +209,33 @@ simply followed. Patching or unpatching a cable takes effect at once. LIVE, the
 first EPOCH position, runs at the base lap with no sampling. RESET returns the
 beads to the sunflower without firing a chord, and RUN holds everything in place.
 
+### Vesper Swarm
+
+![Vesper Swarm](docs/images/VesperSwarm.png)
+
+An eight-voice formant choir in the shape of the Dewanatron Swarmatron. Eight
+soprano singers share one PITCH; at rest they hold the same note a few cents
+apart, and SWARM fans them out in equal semitone steps until the outer voices
+sit an octave either side. A menu option switches the swarm law to Harmonic,
+where the singers spread into whole-number multiples of the pitch the way the
+original's eight oscillators did. Each singer has her own vocal tract, vibrato
+and place in the stereo field, and stands on a point of the eight-pointed star
+of the evening sky: click a point to silence or wake her, and the rays in the
+star glow with the voices that are singing.
+
+Every voice is a band-limited glottal pulse through a five-formant soprano
+filter bank. VOWEL morphs the bank through A, E, I, O and U, with the current
+vowel shown in the heart of the star; BREATH mixes air into the throat. The
+mix passes a saturating 4-pole lowpass (CUTOFF, RES) and a gate-driven ADSR
+(ATK, DEC, SUS, REL) whose attack runs out to a full minute for slow swells.
+The VCA / VCF switch points the envelope at the level, or at the filter
+instead, where it lifts the cutoff by up to seven octaves while the choir
+holds its level. While GATE is unpatched the choir drones; patch a gate and
+the vibrato develops afresh on every note. GLIDE slews the pitch for the
+Swarmatron's ribbon glissandi. Pitch comes from V/OCT with PITCH as a coarse
+offset in semitones, and every other knob has a CV jack in the bay where 10 V
+sweeps its full range (CUTOFF tracks 1 V/oct). Outputs are stereo.
+
 ### Eternal Eclipse
 
 ![Eternal Eclipse](docs/images/EternalEclipse.png)

@@ -57,6 +57,13 @@ inline void addHeader(Widget* parent, float centerX, const std::string& title) {
 	addLabel(parent, Vec(centerX, 7.3f), title, TITLE_SIZE, ACCENT_COLOR);
 }
 
+// House light buttons: the black bezel with Rack's stock red light, as on
+// Elemental Revelator's SPIRIT button. Every lit button on an Eternal
+// Eclipse panel uses one of these two, so the glow reads the same across a
+// rack. Drive them at 1.0 lit and 0 off (a quarter for armed-but-idle).
+using LightButton = VCVLightBezelLatch<RedLight>;        // latching
+using MomentaryLightButton = VCVLightBezel<RedLight>;    // momentary
+
 // Two-position horizontal toggle (left = 0, right = 1), built from the
 // component library's three-position horizontal switch frames.
 struct CKSSHorizontal : app::SvgSwitch {
