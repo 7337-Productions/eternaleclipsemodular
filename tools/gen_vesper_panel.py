@@ -27,6 +27,7 @@ BAY_X, BAY_W = 158.0, 41.2
 STAR_CX, STAR_CY, STAR_R = 54.0, 69.25, 40.0
 STAR_INNER = 0.42 * STAR_R      # radius of the notches of the eight-point silhouette
 STAR_INSETS = (1.4, 2.8, 4.2)   # mm, the nested bands of each four-pointed star
+STAR_EDGE_W, STAR_BAND_W = 0.35, 0.22  # mm; much under 0.25 fades at 100% zoom
 RING_IN, RING_OUT = 41.0, 51.0  # the singers' ring: buttons at 46 sit between
 
 
@@ -135,9 +136,9 @@ svg.append(glyph)
 svg.append("\n  <!-- The star of Ishtar: the eight singers stand beyond its points.\n"
            "       The diagonal four-pointed star lies under the upright one. -->\n")
 for rot in (-45.0, -90.0):
-    svg.append(f'  <path d="{path_of(star_polygon(rot))}" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
+    svg.append(f'  <path d="{path_of(star_polygon(rot))}" fill="#140c06" stroke="#ffc464" stroke-width="{STAR_EDGE_W}" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
     for d in STAR_INSETS:
-        svg.append(f'  <path d="{path_of(star_polygon(rot, d))}" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
+        svg.append(f'  <path d="{path_of(star_polygon(rot, d))}" fill="none" stroke="#ffc464" stroke-width="{STAR_BAND_W}" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>\n')
 svg.append("  <!-- The singers' ring, just outside the points -->\n")
