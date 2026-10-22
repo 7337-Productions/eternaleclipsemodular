@@ -222,9 +222,9 @@ struct VesperSwarm : Module {
 
 // Panel geometry (mm). The star of Ishtar is drawn in the SVG; the singers'
 // toggles sit just beyond its points and the display breathes in its heart.
-static constexpr float STAR_X = 4.f, STAR_Y = 16.f, STAR_W = 100.f, STAR_H = 106.5f;
-static constexpr float STAR_CX = 54.f, STAR_CY = 69.25f, STAR_R = 40.f;
-static constexpr float BUTTON_R = 46.f; // in the ring between the SVG's circles at 41 and 51
+static constexpr float STAR_X = 4.f, STAR_Y = 14.f, STAR_W = 110.f, STAR_H = 111.f;
+static constexpr float STAR_CX = 59.f, STAR_CY = 69.6f, STAR_R = 42.5f;
+static constexpr float BUTTON_R = 48.5f; // in the ring between the SVG's circles at 43.5 and 53.5
 
 static Vec starPoint(int i, float r) {
 	float a = -0.5f * (float)M_PI + (float)i * 0.25f * (float)M_PI;
@@ -290,8 +290,10 @@ struct StarDisplay : TransparentWidget {
 };
 
 struct VesperSwarmWidget : ModuleWidget {
-	// 40 HP. The star on the left, controls in the middle, patch bay right.
-	static constexpr float BAY_C0 = 166.f, BAY_C1 = 178.6f, BAY_C2 = 191.2f;
+	// 40 HP in the Coronal Annihilator's proportions: the star on the left,
+	// a 40 mm controls column in two boxes, a 38 mm patch bay.
+	static constexpr float KX_L = 128.5f, KX_R = 147.5f; // the two big-knob columns
+	static constexpr float BAY_C0 = 168.7f, BAY_C1 = 181.2f, BAY_C2 = 193.7f;
 	static constexpr float BAY_ROW0 = 27.f, BAY_DY = 19.f;
 
 	void addLabel(Vec mmPos, const std::string& text, float fontSize = eclipse::LABEL_SIZE,
@@ -326,35 +328,36 @@ struct VesperSwarmWidget : ModuleWidget {
 			addParam(createLightParamCentered<eclipse::LightButton>(
 				mm2px(starPoint(i, BUTTON_R)), module, VesperSwarm::VOICE_PARAMS + i, VesperSwarm::VOICE_LIGHTS + i));
 
-		// ===== Controls =====
-		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(120.5f, 31.f)), module, VesperSwarm::PITCH_PARAM));
-		addLabel(Vec(120.5f, 41.f), "PITCH");
-		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(142.f, 31.f)), module, VesperSwarm::GLIDE_PARAM));
-		addLabel(Vec(142.f, 37.3f), "GLIDE");
+		// ===== Voice box =====
+		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(KX_L, 30.f)), module, VesperSwarm::PITCH_PARAM));
+		addLabel(Vec(KX_L, 40.f), "PITCH");
+		addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(KX_R, 30.f)), module, VesperSwarm::GLIDE_PARAM));
+		addLabel(Vec(KX_R, 36.3f), "GLIDE");
 
-		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(120.5f, 57.f)), module, VesperSwarm::SWARM_PARAM));
-		addLabel(Vec(120.5f, 67.f), "SWARM");
-		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(141.5f, 57.f)), module, VesperSwarm::VOWEL_PARAM));
-		addLabel(Vec(141.5f, 67.f), "VOWEL");
+		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(KX_L, 54.f)), module, VesperSwarm::SWARM_PARAM));
+		addLabel(Vec(KX_L, 64.f), "SWARM");
+		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(KX_R, 54.f)), module, VesperSwarm::VOWEL_PARAM));
+		addLabel(Vec(KX_R, 64.f), "VOWEL");
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(118.f, 84.f)), module, VesperSwarm::BREATH_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(131.f, 84.f)), module, VesperSwarm::CUTOFF_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(144.f, 84.f)), module, VesperSwarm::RES_PARAM));
-		addLabel(Vec(118.f, 91.2f), "BREATH");
-		addLabel(Vec(131.f, 91.2f), "CUTOFF");
-		addLabel(Vec(144.f, 91.2f), "RES");
+		// ===== Filter + envelope box =====
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(125.f, 80.5f)), module, VesperSwarm::BREATH_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(138.f, 80.5f)), module, VesperSwarm::CUTOFF_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(151.f, 80.5f)), module, VesperSwarm::RES_PARAM));
+		addLabel(Vec(125.f, 87.7f), "BREATH");
+		addLabel(Vec(138.f, 87.7f), "CUTOFF");
+		addLabel(Vec(151.f, 87.7f), "RES");
 
-		static const float EX[4] = {115.5f, 125.8f, 136.2f, 146.5f};
+		static const float EX[4] = {123.f, 133.f, 143.f, 153.f};
 		static const int EP[4] = {VesperSwarm::ATTACK_PARAM, VesperSwarm::DECAY_PARAM,
 		                          VesperSwarm::SUSTAIN_PARAM, VesperSwarm::RELEASE_PARAM};
 		static const char* EL[4] = {"ATK", "DEC", "SUS", "REL"};
 		for (int i = 0; i < 4; i++) {
-			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(EX[i], 104.5f)), module, EP[i]));
-			addLabel(Vec(EX[i], 110.7f), EL[i]);
+			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(EX[i], 102.f)), module, EP[i]));
+			addLabel(Vec(EX[i], 108.2f), EL[i]);
 		}
-		addParam(createParamCentered<eclipse::CKSSHorizontal>(mm2px(Vec(131.f, 117.8f)), module, VesperSwarm::ENV_DEST_PARAM));
-		addLabel(Vec(119.8f, 117.8f), "VCA", eclipse::FINE_SIZE);
-		addLabel(Vec(142.2f, 117.8f), "VCF", eclipse::FINE_SIZE);
+		addParam(createParamCentered<eclipse::CKSSHorizontal>(mm2px(Vec(138.f, 116.f)), module, VesperSwarm::ENV_DEST_PARAM));
+		addLabel(Vec(126.8f, 116.f), "VCA", eclipse::FINE_SIZE);
+		addLabel(Vec(149.2f, 116.f), "VCF", eclipse::FINE_SIZE);
 
 		// ===== Bay =====
 		addBayInput(BAY_C0, 0, "V/OCT", VesperSwarm::VOCT_INPUT, module);
@@ -370,10 +373,10 @@ struct VesperSwarmWidget : ModuleWidget {
 		addBayInput(BAY_C1, 3, "SUS", VesperSwarm::SUSTAIN_INPUT, module);
 		addBayInput(BAY_C2, 3, "REL", VesperSwarm::RELEASE_INPUT, module);
 
-		addLabel(Vec(172.3f, 104.3f), "OUT L", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		addLabel(Vec(184.9f, 104.3f), "OUT R", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(172.3f, 110.f)), module, VesperSwarm::OUTL_OUTPUT));
-		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(184.9f, 110.f)), module, VesperSwarm::OUTR_OUTPUT));
+		addLabel(Vec(174.9f, 104.3f), "OUT L", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		addLabel(Vec(187.5f, 104.3f), "OUT R", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(174.9f, 110.f)), module, VesperSwarm::OUTL_OUTPUT));
+		addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(187.5f, 110.f)), module, VesperSwarm::OUTR_OUTPUT));
 	}
 
 	void appendContextMenu(Menu* menu) override {

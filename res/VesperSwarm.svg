@@ -23,35 +23,37 @@
 
   <!-- The star of Ishtar: the eight singers stand beyond its points.
        The diagonal four-pointed star lies under the upright one. -->
-  <path d="M 82.28,40.97 L 65.77,69.25 L 82.28,97.53 L 54.00,81.02 L 25.72,97.53 L 42.23,69.25 L 25.72,40.97 L 54.00,57.48 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 78.39,44.86 L 64.15,69.25 L 78.39,93.64 L 54.00,79.40 L 29.61,93.64 L 43.85,69.25 L 29.61,44.86 L 54.00,59.10 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 74.49,48.76 L 62.52,69.25 L 74.49,89.74 L 54.00,77.77 L 33.51,89.74 L 45.48,69.25 L 33.51,48.76 L 54.00,60.73 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 70.59,52.66 L 60.90,69.25 L 70.59,85.84 L 54.00,76.15 L 37.41,85.84 L 47.10,69.25 L 37.41,52.66 L 54.00,62.35 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 54.00,29.25 L 62.32,60.93 L 94.00,69.25 L 62.32,77.57 L 54.00,109.25 L 45.68,77.57 L 14.00,69.25 L 45.68,60.93 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 54.00,34.76 L 61.17,62.08 L 88.49,69.25 L 61.17,76.42 L 54.00,103.74 L 46.83,76.42 L 19.51,69.25 L 46.83,62.08 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 54.00,40.27 L 60.03,63.22 L 82.98,69.25 L 60.03,75.28 L 54.00,98.23 L 47.97,75.28 L 25.02,69.25 L 47.97,63.22 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <path d="M 54.00,45.78 L 58.88,64.37 L 77.47,69.25 L 58.88,74.13 L 54.00,92.72 L 49.12,74.13 L 30.53,69.25 L 49.12,64.37 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
-  <circle cx="54.00" cy="69.25" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>
-  <circle cx="54.00" cy="69.25" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>
+  <path d="M 89.05,39.55 L 71.50,69.60 L 89.05,99.65 L 59.00,82.10 L 28.95,99.65 L 46.50,69.60 L 28.95,39.55 L 59.00,57.10 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 85.15,43.45 L 69.88,69.60 L 85.15,95.75 L 59.00,80.48 L 32.85,95.75 L 48.12,69.60 L 32.85,43.45 L 59.00,58.72 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 81.26,47.34 L 68.26,69.60 L 81.26,91.86 L 59.00,78.86 L 36.74,91.86 L 49.74,69.60 L 36.74,47.34 L 59.00,60.34 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 77.36,51.24 L 66.64,69.60 L 77.36,87.96 L 59.00,77.24 L 40.64,87.96 L 51.36,69.60 L 40.64,51.24 L 59.00,61.96 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 59.00,27.10 L 67.84,60.76 L 101.50,69.60 L 67.84,78.44 L 59.00,112.10 L 50.16,78.44 L 16.50,69.60 L 50.16,60.76 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 59.00,32.61 L 66.69,61.91 L 95.99,69.60 L 66.69,77.29 L 59.00,106.59 L 51.31,77.29 L 22.01,69.60 L 51.31,61.91 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 59.00,38.12 L 65.55,63.05 L 90.48,69.60 L 65.55,76.15 L 59.00,101.08 L 52.45,76.15 L 27.52,69.60 L 52.45,63.05 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 59.00,43.63 L 64.40,64.20 L 84.97,69.60 L 64.40,75.00 L 59.00,95.57 L 53.60,75.00 L 33.03,69.60 L 53.60,64.20 Z" fill="none" stroke="#ffc464" stroke-width="0.22" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <circle cx="59.00" cy="69.60" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>
+  <circle cx="59.00" cy="69.60" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>
   <!-- The singers' ring, just outside the points -->
-  <circle cx="54.00" cy="69.25" r="41.00" fill="none" stroke="#ffc464" stroke-width="0.4"/>
-  <circle cx="54.00" cy="69.25" r="51.00" fill="none" stroke="#ffc464" stroke-width="0.4"/>
+  <circle cx="59.00" cy="69.60" r="43.50" fill="none" stroke="#ffc464" stroke-width="0.4"/>
+  <circle cx="59.00" cy="69.60" r="53.50" fill="none" stroke="#ffc464" stroke-width="0.4"/>
 
-  <!-- Controls frame: pitch, swarm, vowel, breath, filter, envelope -->
-  <rect x="108.00" y="16.00" width="46.00" height="106.50" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
-  <line x1="111.00" y1="72" x2="151.00" y2="72" stroke="#382110" stroke-width="0.4"/>
-  <line x1="111.00" y1="95.5" x2="151.00" y2="95.5" stroke="#382110" stroke-width="0.4"/>
+  <!-- Controls: voice box (pitch, glide, swarm, vowel) over filter + envelope box -->
+  <rect x="118.00" y="18.00" width="40.00" height="50.00" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
+  <rect x="118.00" y="71.00" width="40.00" height="51.90" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
+  <line x1="121.00" y1="93" x2="155.00" y2="93" stroke="#382110" stroke-width="0.4"/>
 
   <!-- Patch bay frame: CV inputs, then the stereo outputs -->
-  <rect x="158.00" y="16.00" width="41.20" height="106.50" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
-  <line x1="161.00" y1="97" x2="196.20" y2="97" stroke="#382110" stroke-width="0.4"/>
+  <rect x="162.20" y="18.00" width="38.00" height="104.90" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
+  <line x1="165.20" y1="97" x2="197.20" y2="97" stroke="#382110" stroke-width="0.4"/>
 
   <!-- Corner brackets (Church card motif) -->
   <g fill="none" stroke="#cd762b" stroke-width="0.4" stroke-opacity="0.9">
-    <path d="M 108.00,18.40 L 108.00,16.00 L 110.40,16.00"/>
-    <path d="M 154.00,120.10 L 154.00,122.50 L 151.60,122.50"/>
-    <path d="M 158.00,18.40 L 158.00,16.00 L 160.40,16.00"/>
-    <path d="M 199.20,120.10 L 199.20,122.50 L 196.80,122.50"/>
+    <path d="M 118.00,20.40 L 118.00,18.00 L 120.40,18.00"/>
+    <path d="M 158.00,65.60 L 158.00,68.00 L 155.60,68.00"/>
+    <path d="M 118.00,73.40 L 118.00,71.00 L 120.40,71.00"/>
+    <path d="M 158.00,120.50 L 158.00,122.90 L 155.60,122.90"/>
+    <path d="M 162.20,20.40 L 162.20,18.00 L 164.60,18.00"/>
+    <path d="M 200.20,120.50 L 200.20,122.90 L 197.80,122.90"/>
   </g>
 
   <!-- Brand mark, flush to the bottom edge: ETERNAL (eclipse sigil) ECLIPSE.

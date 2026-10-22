@@ -15,20 +15,22 @@ SYZYGY = (ROOT / "res" / "Syzygy.svg").read_text(encoding="utf-8")
 W, H = 203.2, 128.5
 CX_PANEL = 101.6
 
-# Frames
-TOP, FRAME_H = 16.0, 106.5
-CTRL_X, CTRL_W = 108.0, 46.0
-BAY_X, BAY_W = 158.0, 41.2
+# Frames, in the Coronal Annihilator's proportions: a 40 mm controls column
+# in two boxes and a 38 mm bay, both from y 18 to the screw line
+TOP, BOTTOM = 18.0, 122.9
+CTRL_X, CTRL_W = 118.0, 40.0
+CTRL_SPLIT = 68.0               # top box ends here, the lower starts at +3
+BAY_X, BAY_W = 162.2, 38.0
 
 # The star of Ishtar: two four-pointed stars, one laid over the other at
 # 45 degrees, each with nested bands following its edges, and a bullseye at
 # the heart. The singers' buttons sit just beyond the tips (see
 # VesperSwarm.cpp) so the points stay sharp.
-STAR_CX, STAR_CY, STAR_R = 54.0, 69.25, 40.0
+STAR_CX, STAR_CY, STAR_R = 59.0, 69.6, 42.5
 STAR_INNER = 0.42 * STAR_R      # radius of the notches of the eight-point silhouette
 STAR_INSETS = (1.4, 2.8, 4.2)   # mm, the nested bands of each four-pointed star
 STAR_EDGE_W, STAR_BAND_W = 0.35, 0.22  # mm; much under 0.25 fades at 100% zoom
-RING_IN, RING_OUT = 41.0, 51.0  # the singers' ring: buttons at 46 sit between
+RING_IN, RING_OUT = 43.5, 53.5  # the singers' ring: buttons at 48.5 sit between
 
 
 def f(x):
@@ -113,12 +115,11 @@ def path_of(pts):
     return "M " + " L ".join(f"{f(x)},{f(y)}" for x, y in pts) + " Z"
 
 
-def frame(x, w):
-    return f'  <rect x="{f(x)}" y="{f(TOP)}" width="{f(w)}" height="{f(FRAME_H)}" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>\n'
+def frame(x, w, y0=TOP, y1=BOTTOM):
+    return f'  <rect x="{f(x)}" y="{f(y0)}" width="{f(w)}" height="{f(y1 - y0)}" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>\n'
 
 
-def brackets(x, w):
-    y0, y1 = TOP, TOP + FRAME_H
+def brackets(x, w, y0=TOP, y1=BOTTOM):
     return (
         f'    <path d="M {f(x)},{f(y0 + 2.4)} L {f(x)},{f(y0)} L {f(x + 2.4)},{f(y0)}"/>\n'
         f'    <path d="M {f(x + w)},{f(y1 - 2.4)} L {f(x + w)},{f(y1)} L {f(x + w - 2.4)},{f(y1)}"/>\n'
@@ -145,10 +146,10 @@ svg.append("  <!-- The singers' ring, just outside the points -->\n")
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="{f(RING_IN)}" fill="none" stroke="#ffc464" stroke-width="0.4"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="{f(RING_OUT)}" fill="none" stroke="#ffc464" stroke-width="0.4"/>\n')
 
-svg.append("\n  <!-- Controls frame: pitch, swarm, vowel, breath, filter, envelope -->\n")
-svg.append(frame(CTRL_X, CTRL_W))
-svg.append(f'  <line x1="{f(CTRL_X + 3)}" y1="72" x2="{f(CTRL_X + CTRL_W - 3)}" y2="72" stroke="#382110" stroke-width="0.4"/>\n')
-svg.append(f'  <line x1="{f(CTRL_X + 3)}" y1="95.5" x2="{f(CTRL_X + CTRL_W - 3)}" y2="95.5" stroke="#382110" stroke-width="0.4"/>\n')
+svg.append("\n  <!-- Controls: voice box (pitch, glide, swarm, vowel) over filter + envelope box -->\n")
+svg.append(frame(CTRL_X, CTRL_W, TOP, CTRL_SPLIT))
+svg.append(frame(CTRL_X, CTRL_W, CTRL_SPLIT + 3.0, BOTTOM))
+svg.append(f'  <line x1="{f(CTRL_X + 3)}" y1="93" x2="{f(CTRL_X + CTRL_W - 3)}" y2="93" stroke="#382110" stroke-width="0.4"/>\n')
 
 svg.append("\n  <!-- Patch bay frame: CV inputs, then the stereo outputs -->\n")
 svg.append(frame(BAY_X, BAY_W))
@@ -156,7 +157,8 @@ svg.append(f'  <line x1="{f(BAY_X + 3)}" y1="97" x2="{f(BAY_X + BAY_W - 3)}" y2=
 
 svg.append("\n  <!-- Corner brackets (Church card motif) -->\n")
 svg.append('  <g fill="none" stroke="#cd762b" stroke-width="0.4" stroke-opacity="0.9">\n')
-svg.append(brackets(CTRL_X, CTRL_W))
+svg.append(brackets(CTRL_X, CTRL_W, TOP, CTRL_SPLIT))
+svg.append(brackets(CTRL_X, CTRL_W, CTRL_SPLIT + 3.0, BOTTOM))
 svg.append(brackets(BAY_X, BAY_W))
 svg.append("  </g>\n\n")
 svg.append(brand)
