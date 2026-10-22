@@ -46,6 +46,7 @@ R_TRIO = 39.5                 # SEND / FEED / TUNE knobs
 R_LEVEL = 22.0                # LEVEL knobs; the chain ring runs through them
 R_SEAL = 3.4                  # quarter seals (hexagrams) on the band
 R_CORE = 6.5                  # the hexagram at the heart
+R_PENT_RING, R_PENT = 61.0, 4.5 # the four pentagrams beyond the Circle, at the diagonals
 SEAL_GAP_DEG = 6.5            # the band's names stop this far either side of a seal
 
 TRI_BASE_X, TRI_HALF, TRI_APEX_X = 156.09, 26.0, 201.09   # the Triangle of Art, pointing east; apex 5.09 mm off the right bay
@@ -60,6 +61,7 @@ LINE = "#6b4522"
 HAIR = "#382110"
 FRAME = "#140c06"
 WELL = "#070302"
+RED = "#ff0000"   # Abyssal Harmonics red
 
 CAP_MM = 1.9   # cap height of the baked lettering, as the brand mark
 
@@ -171,6 +173,13 @@ def hexagram(cx, cy, r):
             "M " + " L ".join(f"{f(x)},{f(y)}" for x, y in pts_dn) + " Z")
 
 
+def pentagram(cx, cy, r):
+    # the classic star: one point up, every second vertex joined
+    pts = [polar(cx, cy, r, -90 + 72 * k) for k in range(5)]
+    order = [0, 2, 4, 1, 3]
+    return "M " + " L ".join(f"{f(pts[k][0])},{f(pts[k][1])}" for k in order) + " Z"
+
+
 def frame(x, w, y0=TOP, y1=BOTTOM, fill=FRAME):
     return f'  <rect x="{f(x)}" y="{f(y0)}" width="{f(w)}" height="{f(y1 - y0)}" rx="2" fill="{fill}" stroke="{HAIR}" stroke-width="0.4"/>\n'
 
@@ -238,25 +247,12 @@ for name, centre in zip(NAMES, QUARTER_CENTRES):
         svg.append(f'    <path d="{d}"/>\n')
 svg.append("  </g>\n")
 
-# Serpent: head before EHEIEH, tail after LEVANAH, both just inside the band
-head_a = -90.0 + SEAL_GAP_DEG + 1.5
-hx, hy = polar(CX, CY, R_TEXT, head_a)
-tangent = math.radians(head_a + 90.0)
-tx, ty = math.cos(tangent), math.sin(tangent)      # direction of travel (clockwise)
-nx, ny = math.cos(math.radians(head_a)), math.sin(math.radians(head_a))  # outward
-# a leaf-shaped head pointing against the travel direction (it leads the names)
-head = (f"M {f(hx - tx * 3.6)},{f(hy - ty * 3.6)} "
-        f"Q {f(hx - tx * 1.1 + nx * 2.1)},{f(hy - ty * 1.1 + ny * 2.1)} {f(hx + tx * 1.6)},{f(hy + ty * 1.6)} "
-        f"Q {f(hx - tx * 1.1 - nx * 2.1)},{f(hy - ty * 1.1 - ny * 2.1)} {f(hx - tx * 3.6)},{f(hy - ty * 3.6)} Z")
-ex, ey = hx - tx * 1.6 + nx * 0.8, hy - ty * 1.6 + ny * 0.8
-svg.append("  <!-- The serpent: its head leads the names, its tail follows them -->\n")
-svg.append(f'  <path d="{head}" fill="{FRAME}" stroke="{GOLD}" stroke-width="0.35"/>\n')
-svg.append(f'  <circle cx="{f(ex)}" cy="{f(ey)}" r="0.35" fill="{GOLD}"/>\n')
-tail_a = 270.0 - SEAL_GAP_DEG - 1.5
-tx0, ty0 = polar(CX, CY, R_TEXT + 1.8, tail_a - 6.0)
-tx1, ty1 = polar(CX, CY, R_TEXT - 1.8, tail_a - 6.0)
-tpx, tpy = polar(CX, CY, R_TEXT, tail_a + 0.5)
-svg.append(f'  <path d="M {f(tx0)},{f(ty0)} Q {f(tpx)},{f(tpy)} {f(tx1)},{f(ty1)}" fill="none" stroke="{GOLD}" stroke-width="0.35"/>\n')
+# Four pentagrams stand outside the Circle at the diagonals, as on the
+# plate, in Abyssal Harmonics red
+svg.append("  <!-- The four pentagrams beyond the Circle -->\n")
+for deg in (-45.0, 45.0, 135.0, 225.0):
+    px, py = polar(CX, CY, R_PENT_RING, deg)
+    svg.append(f'  <path d="{pentagram(px, py, R_PENT)}" fill="none" stroke="{RED}" stroke-width="0.45" stroke-linejoin="round"/>\n')
 
 # Quarter seals: hexagrams on the band at N E S W, each the place of a FEED light
 svg.append("  <!-- Quarter seals: the four FEED lights sit at their hearts -->\n")
