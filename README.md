@@ -215,7 +215,9 @@ beads to the sunflower without firing a chord, and RUN holds everything in place
 
 A four-channel stereo mixer that is a plain mixer at rest and a feedback instrument
 when pushed. Each channel is a VCA: stereo IN (right normalled to left), a 0-10 V
-level CV, LEVEL, a post-fader SEND, and stereo OUT jacks. The channels are chained
+level CV, LEVEL, a post-fader SEND, and stereo OUT jacks, with CV inputs for SEND,
+FEED (-5 to +5 V sweeps the knob's range) and TUNE (1 V/oct) in the row beneath
+its audio inputs. The channels are chained
 the way Mutable's Veils chains its VCAs: an unpatched OUT passes the channel down
 into the next, and channel 4 falls into the master, so with nothing patched on the
 outs the master carries all four and patching an OUT takes that channel out of the
@@ -231,7 +233,8 @@ is off, and turning it sends that channel's chained output backward through a co
 into the channel before it, channel 1 into channel 4, so the circle only closes when
 every FEED is engaged. The comb is a short delay tuned by TUNE, 20 Hz to 2 kHz,
 darkened by the global MATTER (300 Hz at full dark, 12 kHz at full bright, never
-below four times the comb's pitch) and saturated, so a loop pushed past unity does
+below four times the comb's pitch, with a CV jack beside it) and saturated, so a
+loop pushed past unity does
 not blow up but sings at TUNE. Turned to the right it sings TUNE itself; turned to
 the left the feedback inverts and it sings an octave below. Past about two o'clock
 a loop crosses unity and will sing on its own with nothing patched into it: a

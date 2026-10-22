@@ -217,6 +217,10 @@ svg.append(glyph)
 svg.append("\n  <!-- Bays: inputs and level CV on the left; outs, loop and master on the right -->\n")
 svg.append(frame(BAY_L_X, BAY_L_W))
 svg.append(frame(BAY_R_X, BAY_R_W))
+# hairlines between the input bay's channel groups (two rows each; see the .cpp)
+for k in range(1, 4):
+    y = 31.0 + 24.5 * (k - 0.5) + 5.5   # midway between one group's lower row and the next group's upper row
+    svg.append(f'  <line x1="{f(BAY_L_X + 3)}" y1="{f(y)}" x2="{f(BAY_L_X + BAY_L_W - 3)}" y2="{f(y)}" stroke="{HAIR}" stroke-width="0.4"/>\n')
 svg.append(f'  <g fill="none" stroke="{COPPER}" stroke-width="0.4" stroke-opacity="0.9">\n')
 svg.append(brackets(BAY_L_X, BAY_L_W))
 svg.append(brackets(BAY_R_X, BAY_R_W))

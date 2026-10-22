@@ -25,6 +25,9 @@
   <!-- Bays: inputs and level CV on the left; outs, loop and master on the right -->
   <rect x="3.000" y="18.000" width="38.000" height="104.900" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
   <rect x="206.180" y="18.000" width="24.500" height="104.900" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
+  <line x1="6.000" y1="48.750" x2="38.000" y2="48.750" stroke="#382110" stroke-width="0.4"/>
+  <line x1="6.000" y1="73.250" x2="38.000" y2="73.250" stroke="#382110" stroke-width="0.4"/>
+  <line x1="6.000" y1="97.750" x2="38.000" y2="97.750" stroke="#382110" stroke-width="0.4"/>
   <g fill="none" stroke="#cd762b" stroke-width="0.4" stroke-opacity="0.9">
     <path d="M 3.000,20.400 L 3.000,18.000 L 5.400,18.000"/>
     <path d="M 41.000,120.500 L 41.000,122.900 L 38.600,122.900"/>

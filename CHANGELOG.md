@@ -11,7 +11,8 @@
   menu) that nothing gets past. Each channel's bipolar FEED sends its
   chained output backward round the ring through a tunable, saturating
   comb into the channel before it (TUNE 20 Hz-2 kHz, global MATTER
-  300 Hz-12 kHz); past unity the loop sings TUNE, or an octave down with
+  300 Hz-12 kHz); SEND, FEED and TUNE each take a CV per channel (TUNE at
+  1 V/oct) and MATTER has one too; past unity the loop sings TUNE, or an octave down with
   FEED inverted, and a quiet loop seeds itself so a ring started from
   silence lands on pitch. Per-channel exponential level curve in the
   menu. The panel is the Circle and Triangle of Solomon with the Triangle

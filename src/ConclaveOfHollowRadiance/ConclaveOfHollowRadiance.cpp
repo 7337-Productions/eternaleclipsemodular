@@ -35,8 +35,12 @@ struct ConclaveOfHollowRadiance : Module {
 		ENUMS(INL_INPUTS, CHANNELS),
 		ENUMS(INR_INPUTS, CHANNELS),
 		ENUMS(CV_INPUTS, CHANNELS),
+		ENUMS(SEND_CV_INPUTS, CHANNELS),
+		ENUMS(FEED_CV_INPUTS, CHANNELS),
+		ENUMS(TUNE_CV_INPUTS, CHANNELS),
 		RETL_INPUT,
 		RETR_INPUT,
+		MATTER_INPUT,
 		INPUTS_LEN
 	};
 	enum OutputId {
@@ -88,6 +92,9 @@ struct ConclaveOfHollowRadiance : Module {
 			configInput(INL_INPUTS + n, ch + " left");
 			configInput(INR_INPUTS + n, ch + " right (normalled to left)");
 			configInput(CV_INPUTS + n, ch + " level CV (0-10 V)");
+			configInput(SEND_CV_INPUTS + n, ch + " send CV (10 V = full range)");
+			configInput(FEED_CV_INPUTS + n, ch + " feed CV (-5..+5 V = full range)");
+			configInput(TUNE_CV_INPUTS + n, ch + " tune CV (1 V/oct)");
 			configOutput(OUTL_OUTPUTS + n, ch + " left (unpatched: passes down the chain)");
 			configOutput(OUTR_OUTPUTS + n, ch + " right (unpatched: passes down the chain)");
 			configLight(FEED_LIGHTS + n, ch + " loop above unity");
@@ -98,6 +105,7 @@ struct ConclaveOfHollowRadiance : Module {
 		configParam(MASTER_PARAM, 0.f, 1.f, 1.f, "Master level", "%", 0.f, 100.f);
 		configInput(RETL_INPUT, "Return left");
 		configInput(RETR_INPUT, "Return right (normalled to left)");
+		configInput(MATTER_INPUT, "Matter CV (10 V = full range)");
 		configOutput(SENDL_OUTPUT, "Send left");
 		configOutput(SENDR_OUTPUT, "Send right");
 		configOutput(MASTERL_OUTPUT, "Master left (limited)");
@@ -111,16 +119,18 @@ struct ConclaveOfHollowRadiance : Module {
 		}
 	}
 
-	// Knob state the engine recomputes coefficients from (once per block)
+	// Knob and CV state the engine recomputes coefficients from (once per block)
 	conclave::CircleParams readParams() {
 		conclave::CircleParams p = circle.p;
+		const float octaves = std::log2(TUNE_MAX_HZ / TUNE_MIN_HZ); // the TUNE knob's span, for 1 V/oct
 		for (int n = 0; n < CHANNELS; n++) {
-			p.send[n] = params[SEND_PARAMS + n].getValue();
-			p.feed[n] = params[FEED_PARAMS + n].getValue() * FEED_MAX;
-			p.tuneHz[n] = TUNE_MIN_HZ * std::pow(TUNE_MAX_HZ / TUNE_MIN_HZ, params[TUNE_PARAMS + n].getValue());
+			p.send[n] = clamp(params[SEND_PARAMS + n].getValue() + inputs[SEND_CV_INPUTS + n].getVoltage() / 10.f, 0.f, 1.f);
+			p.feed[n] = clamp(params[FEED_PARAMS + n].getValue() + inputs[FEED_CV_INPUTS + n].getVoltage() / 5.f, -1.f, 1.f) * FEED_MAX;
+			float tune = clamp(params[TUNE_PARAMS + n].getValue() + inputs[TUNE_CV_INPUTS + n].getVoltage() / octaves, 0.f, 1.f);
+			p.tuneHz[n] = TUNE_MIN_HZ * std::pow(TUNE_MAX_HZ / TUNE_MIN_HZ, tune);
 			p.outPatched[n] = outputs[OUTL_OUTPUTS + n].isConnected() || outputs[OUTR_OUTPUTS + n].isConnected();
 		}
-		p.matter = params[MATTER_PARAM].getValue();
+		p.matter = clamp(params[MATTER_PARAM].getValue() + inputs[MATTER_INPUT].getVoltage() / 10.f, 0.f, 1.f);
 		p.ret = params[RETURN_PARAM].getValue();
 		p.loopReturn = params[LOOP_PARAM].getValue() > 0.5f;
 		p.master = params[MASTER_PARAM].getValue();
@@ -357,8 +367,10 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 	static constexpr float R_NUMERAL = 11.f;            // channel numerals, inside the LEVEL knobs
 	static constexpr float R_TRIO_LABEL = 33.2f;        // the east and west clusters' turned labels
 	static constexpr float BAY_L_COL[3] = {13.f, 23.5f, 34.f};
+	static constexpr float BAY_L_ROW_A = 31.f, BAY_L_ROW_B = 42.f, BAY_L_GROUP = 24.5f; // a channel is two rows
 	static constexpr float BAY_R_COL[2] = {213.18f, 223.68f};
-	static constexpr float BAY_ROW0 = 32.f, BAY_STEP = 14.3f; // both bays share the row grid
+	static constexpr float BAY_ROW0 = 32.f, BAY_STEP = 14.3f;
+	static constexpr float MATTER_X = 166.1f, MATTER_CV_X = 176.1f, MATTER_Y = 101.f;
 
 	void addJack(float x, float y, int id, bool output) {
 		if (output)
@@ -415,20 +427,28 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 		addParam(createParamCentered<eclipse::CKSSHorizontal>(mm2px(Vec(TRI_CX, 43.f)), module, ConclaveOfHollowRadiance::LOOP_PARAM));
 		eclipse::addLabel(this, Vec(TRI_CX - 9.5f, 43.f), "POST", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
 		eclipse::addLabel(this, Vec(TRI_CX + 9.5f, 43.f), "LOOP", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(TRI_CX, 101.f)), module, ConclaveOfHollowRadiance::MATTER_PARAM));
-		eclipse::addLabel(this, Vec(TRI_CX, 101.f + 7.2f), "MATTER", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(MATTER_X, MATTER_Y)), module, ConclaveOfHollowRadiance::MATTER_PARAM));
+		eclipse::addLabel(this, Vec(MATTER_X, MATTER_Y + 7.2f), "MATTER", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		addJack(MATTER_CV_X, MATTER_Y, ConclaveOfHollowRadiance::MATTER_INPUT, false);
+		eclipse::addLabel(this, Vec(MATTER_CV_X, MATTER_Y + 6.6f), "CV", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
 
-		// Input bay: IN L, IN R, CV per channel
-		eclipse::addLabel(this, Vec(BAY_L_COL[0], 24.f), "IN L", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
-		eclipse::addLabel(this, Vec(BAY_L_COL[1], 24.f), "IN R", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
-		eclipse::addLabel(this, Vec(BAY_L_COL[2], 24.f), "CV", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
-		// Input rows share the output bay's grid, so IN 1 faces OUT 1 across the panel
+		// Input bay: each channel is two rows, IN L / IN R / level CV above
+		// and SEND / FEED / TUNE CV below; the two header lines read in that order
+		eclipse::addLabel(this, Vec(BAY_L_COL[0], 20.8f), "IN L", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[1], 20.8f), "IN R", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[2], 20.8f), "CV", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[0], 24.2f), "SEND", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[1], 24.2f), "FEED", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[2], 24.2f), "TUNE", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
 		for (int n = 0; n < CHANNELS; n++) {
-			float y = BAY_ROW0 + n * BAY_STEP;
-			addJack(BAY_L_COL[0], y, ConclaveOfHollowRadiance::INL_INPUTS + n, false);
-			addJack(BAY_L_COL[1], y, ConclaveOfHollowRadiance::INR_INPUTS + n, false);
-			addJack(BAY_L_COL[2], y, ConclaveOfHollowRadiance::CV_INPUTS + n, false);
-			eclipse::addLabel(this, Vec(6.5f, y), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+			float ya = BAY_L_ROW_A + n * BAY_L_GROUP, yb = BAY_L_ROW_B + n * BAY_L_GROUP;
+			addJack(BAY_L_COL[0], ya, ConclaveOfHollowRadiance::INL_INPUTS + n, false);
+			addJack(BAY_L_COL[1], ya, ConclaveOfHollowRadiance::INR_INPUTS + n, false);
+			addJack(BAY_L_COL[2], ya, ConclaveOfHollowRadiance::CV_INPUTS + n, false);
+			addJack(BAY_L_COL[0], yb, ConclaveOfHollowRadiance::SEND_CV_INPUTS + n, false);
+			addJack(BAY_L_COL[1], yb, ConclaveOfHollowRadiance::FEED_CV_INPUTS + n, false);
+			addJack(BAY_L_COL[2], yb, ConclaveOfHollowRadiance::TUNE_CV_INPUTS + n, false);
+			eclipse::addLabel(this, Vec(6.5f, 0.5f * (ya + yb)), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
 		}
 
 		// Output bay: the four direct outs, the send, the return, the master
