@@ -236,6 +236,55 @@ Swarmatron's ribbon glissandi. Pitch comes from V/OCT with PITCH as a coarse
 offset in semitones, and every other knob has a CV jack in the bay where 10 V
 sweeps its full range (CUTOFF tracks 1 V/oct). Outputs are stereo.
 
+### Conclave of Hollow Radiance
+
+![Conclave of Hollow Radiance](docs/images/ConclaveOfHollowRadiance.png)
+
+A four-channel stereo mixer that is a plain mixer at rest and a feedback instrument
+when pushed. Each channel is a VCA: stereo IN (right normalled to left), a 0-10 V
+level CV, LEVEL, a post-fader SEND, and stereo OUT jacks, with CV inputs for SEND,
+FEED (-5 to +5 V sweeps the knob's range) and TUNE (1 V/oct) in the row beneath
+its audio inputs. The channels are chained
+the way Mutable's Veils chains its VCAs: an unpatched OUT passes the channel down
+into the next, and channel 4 falls into the master, so with nothing patched on the
+outs the master carries all four and patching an OUT takes that channel out of the
+mix. One stereo send bus leaves through SEND; the RETURN comes back either into the
+master (POST) or, with the switch at LOOP, into channel 1, which puts whatever you
+have in the loop inside the feedback circle. MASTER sets the level into a lookahead
+limiter (2 ms, ceiling 5 V, or 10 V from the menu) that nothing gets past, so the
+feedback can be pushed as hard as you like without leaving the box above the
+ceiling. The menu also switches each channel's level curve to exponential.
+
+The feedback runs the other way round the ring. Each channel's FEED is bipolar: noon
+is off, and turning it sends that channel's chained output backward through a comb
+into the channel before it, channel 1 into channel 4, so the circle only closes when
+every FEED is engaged. The comb is a short delay tuned by TUNE, 20 Hz to 2 kHz,
+darkened by the global MATTER (300 Hz at full dark, 12 kHz at full bright, never
+below four times the comb's pitch, with a CV jack beside it) and saturated, so a
+loop pushed past unity does
+not blow up but sings at TUNE. Turned to the right it sings TUNE itself; turned to
+the left the feedback inverts and it sings an octave below. Past about two o'clock
+a loop crosses unity and will sing on its own with nothing patched into it: a
+digital loop has no noise floor, so a quiet comb with FEED past unity seeds itself
+with a tenth of a millivolt at its pitch, and a ring started from silence lands on
+TUNE every time. Feed it audio and the ring resonates that instead; a loud burst
+followed by silence leaves the loop ringing with the shape it was fed, which is how
+feedback combs behave. The red light in each quarter seal comes on when that
+channel's loop reaches unity, and sits at a quarter when FEED is engaged below it.
+
+The panel is the Circle and Triangle of Solomon from the Goetia, turned so the
+Triangle of Art points east. The four channels stand at the quarters of the Circle,
+1 at north and then clockwise, the way the chain runs; the divine names of the
+Circle run round the serpent's band between its two rings, EHEIEH to LEVANAH, and
+the four pentagrams stand beyond it in Abyssal red. The chain glows clockwise along
+the inside of the band, brighter with the level leaving each channel, and a highlight
+travels round each quarter lighting the names it passes; feedback glows
+counter-clockwise just inside the inner ring in red. MASTER sits in the Triangle's
+circle, which fills with the limiter's gain reduction: copper while limiting, red if
+the hard clip ever engages. A good first patch: Cosmic Clock's waves into the four
+level CVs, Liminal Vast in the loop with the switch at LOOP, and one FEED turned up
+slowly until the circle begins to speak.
+
 ### Eternal Eclipse
 
 ![Eternal Eclipse](docs/images/EternalEclipse.png)

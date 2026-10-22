@@ -14,5 +14,6 @@ void init(Plugin* p) {
 	p->addModel(modelLitanyEngine);
 	p->addModel(modelSyzygy);
 	p->addModel(modelVesperSwarm);
+	p->addModel(modelConclaveOfHollowRadiance);
 	p->addModel(modelEternalEclipse);
 }
