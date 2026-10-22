@@ -39,7 +39,7 @@ TOP, BOTTOM = 18.0, 122.9
 BAY_L_X, BAY_L_W = 3.0, 38.0
 BAY_R_X, BAY_R_W = 207.0, 33.84
 
-CX, CY = 98.0, 70.45          # the Circle (the Coronal Annihilator's 53 mm ring)
+CX, CY = 99.5, 70.45          # the Circle (the Coronal Annihilator's 53 mm ring); 5.5 mm off the left bay
 R_OUT, R_IN = 53.0, 45.0      # the two rings; the serpent's band lies between
 R_TEXT = 49.0                 # centre line of the band
 R_TRIO = 39.5                 # SEND / FEED / TUNE knobs
@@ -48,8 +48,8 @@ R_SEAL = 3.4                  # quarter seals (hexagrams) on the band
 R_CORE = 6.5                  # the hexagram at the heart
 SEAL_GAP_DEG = 6.5            # the band's names stop this far either side of a seal
 
-TRI_BASE_X, TRI_HALF, TRI_APEX_X = 155.0, 26.0, 200.0   # the Triangle of Art, pointing east
-TRI_CX = TRI_BASE_X + (TRI_APEX_X - TRI_BASE_X) / 3.0   # centroid x (170.0)
+TRI_BASE_X, TRI_HALF, TRI_APEX_X = 156.5, 26.0, 201.5   # the Triangle of Art, pointing east; apex 5.5 mm off the right bay
+TRI_CX = TRI_BASE_X + (TRI_APEX_X - TRI_BASE_X) / 3.0   # centroid x (171.5)
 TRI_CY = CY
 R_TRI_INNER = 13.0
 
