@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate res/ConclaveOfHollowRadiance.svg (44 HP).
+"""Generate res/ConclaveOfHollowRadiance.svg (48 HP).
 
 The Circle and Triangle of Solomon from the Goetia, turned so the Triangle
 of Art points east. The Circle is a double ring with the serpent's band
@@ -29,27 +29,27 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SYZYGY = (ROOT / "res" / "Syzygy.svg").read_text(encoding="utf-8")
 FONT_PATH = pathlib.Path(r"C:\Users\nicho\Claude\RelicsOfTheEternalEclipse\medallions-of-the-seventy-two\fonts\Cinzel-Variable.ttf")
 
-W, H = 223.52, 128.5
+W, H = 243.84, 128.5
 CX_PANEL = W / 2.0
 SYZYGY_CX = 101.6
 SHIFT = CX_PANEL - SYZYGY_CX
 TOP, BOTTOM = 18.0, 122.9
 
 # ---- geometry (mirrored in the .cpp) ----
-BAY_L_X, BAY_L_W = 3.0, 36.0
-BAY_R_X, BAY_R_W = 190.0, 30.5
+BAY_L_X, BAY_L_W = 3.0, 38.0
+BAY_R_X, BAY_R_W = 207.0, 33.84
 
-CX, CY = 90.0, 70.45          # the Circle
-R_OUT, R_IN = 48.0, 40.0      # the two rings; the serpent's band lies between
-R_TEXT = 44.0                 # centre line of the band
-R_TRIO = 34.5                 # SEND / FEED / TUNE knobs
-R_LEVEL = 19.0                # LEVEL knobs; the chain ring runs through them
-R_SEAL = 3.0                  # quarter seals (hexagrams) on the band
-R_CORE = 5.5                  # the hexagram at the heart
+CX, CY = 98.0, 70.45          # the Circle (the Coronal Annihilator's 53 mm ring)
+R_OUT, R_IN = 53.0, 45.0      # the two rings; the serpent's band lies between
+R_TEXT = 49.0                 # centre line of the band
+R_TRIO = 39.5                 # SEND / FEED / TUNE knobs
+R_LEVEL = 22.0                # LEVEL knobs; the chain ring runs through them
+R_SEAL = 3.4                  # quarter seals (hexagrams) on the band
+R_CORE = 6.5                  # the hexagram at the heart
 SEAL_GAP_DEG = 6.5            # the band's names stop this far either side of a seal
 
-TRI_BASE_X, TRI_HALF, TRI_APEX_X = 142.0, 26.0, 187.0   # the Triangle of Art, pointing east
-TRI_CX = TRI_BASE_X + (TRI_APEX_X - TRI_BASE_X) / 3.0   # centroid x (156.0)
+TRI_BASE_X, TRI_HALF, TRI_APEX_X = 155.0, 26.0, 200.0   # the Triangle of Art, pointing east
+TRI_CX = TRI_BASE_X + (TRI_APEX_X - TRI_BASE_X) / 3.0   # centroid x (170.0)
 TRI_CY = CY
 R_TRI_INNER = 13.0
 
@@ -61,7 +61,7 @@ HAIR = "#382110"
 FRAME = "#140c06"
 WELL = "#070302"
 
-CAP_MM = 1.7   # cap height of the baked lettering (the brand mark is 1.9)
+CAP_MM = 1.9   # cap height of the baked lettering, as the brand mark
 
 
 def f(x):
@@ -245,16 +245,16 @@ tangent = math.radians(head_a + 90.0)
 tx, ty = math.cos(tangent), math.sin(tangent)      # direction of travel (clockwise)
 nx, ny = math.cos(math.radians(head_a)), math.sin(math.radians(head_a))  # outward
 # a leaf-shaped head pointing against the travel direction (it leads the names)
-head = (f"M {f(hx - tx * 3.2)},{f(hy - ty * 3.2)} "
-        f"Q {f(hx - tx * 1.0 + nx * 1.9)},{f(hy - ty * 1.0 + ny * 1.9)} {f(hx + tx * 1.4)},{f(hy + ty * 1.4)} "
-        f"Q {f(hx - tx * 1.0 - nx * 1.9)},{f(hy - ty * 1.0 - ny * 1.9)} {f(hx - tx * 3.2)},{f(hy - ty * 3.2)} Z")
-ex, ey = hx - tx * 1.4 + nx * 0.7, hy - ty * 1.4 + ny * 0.7
+head = (f"M {f(hx - tx * 3.6)},{f(hy - ty * 3.6)} "
+        f"Q {f(hx - tx * 1.1 + nx * 2.1)},{f(hy - ty * 1.1 + ny * 2.1)} {f(hx + tx * 1.6)},{f(hy + ty * 1.6)} "
+        f"Q {f(hx - tx * 1.1 - nx * 2.1)},{f(hy - ty * 1.1 - ny * 2.1)} {f(hx - tx * 3.6)},{f(hy - ty * 3.6)} Z")
+ex, ey = hx - tx * 1.6 + nx * 0.8, hy - ty * 1.6 + ny * 0.8
 svg.append("  <!-- The serpent: its head leads the names, its tail follows them -->\n")
 svg.append(f'  <path d="{head}" fill="{FRAME}" stroke="{GOLD}" stroke-width="0.35"/>\n')
 svg.append(f'  <circle cx="{f(ex)}" cy="{f(ey)}" r="0.35" fill="{GOLD}"/>\n')
 tail_a = 270.0 - SEAL_GAP_DEG - 1.5
-tx0, ty0 = polar(CX, CY, R_TEXT + 1.6, tail_a - 6.0)
-tx1, ty1 = polar(CX, CY, R_TEXT - 1.6, tail_a - 6.0)
+tx0, ty0 = polar(CX, CY, R_TEXT + 1.8, tail_a - 6.0)
+tx1, ty1 = polar(CX, CY, R_TEXT - 1.8, tail_a - 6.0)
 tpx, tpy = polar(CX, CY, R_TEXT, tail_a + 0.5)
 svg.append(f'  <path d="M {f(tx0)},{f(ty0)} Q {f(tpx)},{f(tpy)} {f(tx1)},{f(ty1)}" fill="none" stroke="{GOLD}" stroke-width="0.35"/>\n')
 

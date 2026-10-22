@@ -26,27 +26,34 @@ struct PanelLabel : TransparentWidget {
 	std::string text;
 	float fontSize;
 	NVGcolor color;
+	float angle = 0.f; // degrees, clockwise on screen, about the label's centre
 
 	void draw(const DrawArgs& args) override {
 		std::shared_ptr<Font> font = APP->window->loadFont(asset::system("res/fonts/ShareTechMono-Regular.ttf"));
 		if (!font)
 			return;
+		nvgSave(args.vg);
+		nvgTranslate(args.vg, box.size.x / 2.f, box.size.y / 2.f);
+		if (angle != 0.f)
+			nvgRotate(args.vg, angle * (float)M_PI / 180.f);
 		nvgFontFaceId(args.vg, font->handle);
 		nvgFontSize(args.vg, fontSize);
 		nvgTextAlign(args.vg, NVG_ALIGN_CENTER | NVG_ALIGN_MIDDLE);
 		nvgFillColor(args.vg, color);
-		nvgText(args.vg, box.size.x / 2.f, box.size.y / 2.f, text.c_str(), NULL);
+		nvgText(args.vg, 0.f, 0.f, text.c_str(), NULL);
+		nvgRestore(args.vg);
 	}
 };
 
 inline void addLabel(Widget* parent, Vec mmPos, const std::string& text,
-                     float fontSize = LABEL_SIZE, NVGcolor color = LABEL_COLOR) {
+                     float fontSize = LABEL_SIZE, NVGcolor color = LABEL_COLOR, float angle = 0.f) {
 	PanelLabel* label = new PanelLabel;
-	label->box.size = mm2px(Vec(30.f, 5.f));
+	label->box.size = mm2px(Vec(30.f, 30.f));
 	label->box.pos = mm2px(mmPos).minus(label->box.size.div(2));
 	label->text = text;
 	label->fontSize = fontSize;
 	label->color = color;
+	label->angle = angle;
 	parent->addChild(label);
 }
 

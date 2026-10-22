@@ -195,17 +195,18 @@ struct ConclaveOfHollowRadiance : Module {
 // above the Triangle, MATTER below. Inputs bay on the far left, outs and the
 // loop on the far right. Geometry constants mirror tools/gen_conclave_panel.py.
 struct ConclaveOfHollowRadianceWidget : ModuleWidget {
-	static constexpr float W = 223.52f; // 44 HP
+	static constexpr float W = 243.84f; // 48 HP
 	static constexpr float XC = W / 2.f;
-	static constexpr float CX = 90.f, CY = 70.45f;      // the Circle
-	static constexpr float R_TEXT = 44.f;               // the band's centre line (seals, lights)
-	static constexpr float R_TRIO = 34.5f;              // SEND / FEED / TUNE
-	static constexpr float R_LEVEL = 19.f;              // LEVEL, on the chain ring
-	static constexpr float TRI_CX = 156.f;              // the Triangle's centroid
-	static constexpr float BAY_L_COL[3] = {12.f, 23.f, 34.f};
-	static constexpr float BAY_L_ROW[CHANNELS] = {38.f, 60.f, 82.f, 104.f};
-	static constexpr float BAY_R_COL[2] = {198.f, 212.5f};
-	static constexpr float BAY_R_ROW0 = 32.f, BAY_R_STEP = 14.3f;
+	static constexpr float CX = 98.f, CY = 70.45f;      // the Circle
+	static constexpr float R_TEXT = 49.f;               // the band's centre line (seals, lights)
+	static constexpr float R_TRIO = 39.5f;              // SEND / FEED / TUNE
+	static constexpr float R_LEVEL = 22.f;              // LEVEL, on the chain ring
+	static constexpr float R_NUMERAL = 11.f;            // channel numerals, inside the LEVEL knobs
+	static constexpr float R_TRIO_LABEL = 33.2f;        // the east and west clusters' turned labels
+	static constexpr float TRI_CX = 155.f + 45.f / 3.f; // the Triangle's centroid (170)
+	static constexpr float BAY_L_COL[3] = {15.f, 25.5f, 36.f};
+	static constexpr float BAY_R_COL[2] = {215.9f, 231.9f};
+	static constexpr float BAY_ROW0 = 32.f, BAY_STEP = 14.3f; // both bays share the row grid
 
 	static Vec polar(float r, float deg) {
 		float a = deg * (float)M_PI / 180.f;
@@ -236,18 +237,21 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 			float q = QUARTER[n];
 			Vec level = polar(R_LEVEL, q);
 			addParam(createParamCentered<RoundBigBlackKnob>(mm2px(level), module, ConclaveOfHollowRadiance::LEVEL_PARAMS + n));
-			eclipse::addLabel(this, polar(9.2f, q), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+			eclipse::addLabel(this, polar(R_NUMERAL, q), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
 
 			Vec send = polar(R_TRIO, q - 22.f), feed = polar(R_TRIO, q), tune = polar(R_TRIO, q + 22.f);
 			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(send), module, ConclaveOfHollowRadiance::SEND_PARAMS + n));
 			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(feed), module, ConclaveOfHollowRadiance::FEED_PARAMS + n));
 			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(tune), module, ConclaveOfHollowRadiance::TUNE_PARAMS + n));
-			// Labels sit 6.6 mm inward of their knobs; at east and west the
-			// FEED label would land on LEVEL, so it goes above its knob instead
-			eclipse::addLabel(this, polar(R_TRIO - 6.6f, q - 22.f), "SEND", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-			eclipse::addLabel(this, polar(R_TRIO - 6.6f, q + 22.f), "TUNE", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+			// North and south: labels read upright, 6.6 mm inward of their
+			// knobs. East and west: the labels turn to run along the band,
+			// their tops toward the heart of the Circle.
 			bool side = (n == 1 || n == 3);
-			eclipse::addLabel(this, side ? feed.plus(Vec(0.f, -6.2f)) : polar(R_TRIO - 6.6f, q), "FEED", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+			float rLabel = side ? R_TRIO_LABEL : R_TRIO - 6.6f;
+			float angle = side ? (n == 1 ? -90.f : 90.f) : 0.f;
+			eclipse::addLabel(this, polar(rLabel, q - 22.f), "SEND", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR, angle);
+			eclipse::addLabel(this, polar(rLabel, q), "FEED", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR, angle);
+			eclipse::addLabel(this, polar(rLabel, q + 22.f), "TUNE", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR, angle);
 
 			addChild(createLightCentered<SmallLight<RedLight>>(mm2px(polar(R_TEXT, q)), module, ConclaveOfHollowRadiance::FEED_LIGHTS + n));
 		}
@@ -266,12 +270,13 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 		eclipse::addLabel(this, Vec(BAY_L_COL[0], 24.f), "IN L", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
 		eclipse::addLabel(this, Vec(BAY_L_COL[1], 24.f), "IN R", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
 		eclipse::addLabel(this, Vec(BAY_L_COL[2], 24.f), "CV", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		// Input rows share the output bay's grid, so IN 1 faces OUT 1 across the panel
 		for (int n = 0; n < CHANNELS; n++) {
-			float y = BAY_L_ROW[n];
+			float y = BAY_ROW0 + n * BAY_STEP;
 			addJack(BAY_L_COL[0], y, ConclaveOfHollowRadiance::INL_INPUTS + n, false);
 			addJack(BAY_L_COL[1], y, ConclaveOfHollowRadiance::INR_INPUTS + n, false);
 			addJack(BAY_L_COL[2], y, ConclaveOfHollowRadiance::CV_INPUTS + n, false);
-			eclipse::addLabel(this, Vec(6.3f, y), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+			eclipse::addLabel(this, Vec(7.5f, y), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
 		}
 
 		// Output bay: the four direct outs, the send, the return, the master
@@ -287,7 +292,7 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 		eclipse::addLabel(this, Vec(BAY_R_COL[0], 21.8f), "L", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
 		eclipse::addLabel(this, Vec(BAY_R_COL[1], 21.8f), "R", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
 		for (int r = 0; r < 7; r++) {
-			float y = BAY_R_ROW0 + r * BAY_R_STEP;
+			float y = BAY_ROW0 + r * BAY_STEP;
 			addJack(BAY_R_COL[0], y, ROW_L[r], ROW_OUTPUT[r]);
 			addJack(BAY_R_COL[1], y, ROW_R[r], ROW_OUTPUT[r]);
 			eclipse::addLabel(this, Vec(mid, y - 6.4f), ROW_LABEL[r], eclipse::LABEL_SIZE,
