@@ -13,4 +13,5 @@ extern Model* modelCosmicClock;
 extern Model* modelCoronalAnnihilator;
 extern Model* modelLitanyEngine;
 extern Model* modelSyzygy;
+extern Model* modelConclaveOfHollowRadiance;
 extern Model* modelEternalEclipse;

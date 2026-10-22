@@ -13,5 +13,6 @@ void init(Plugin* p) {
 	p->addModel(modelCoronalAnnihilator);
 	p->addModel(modelLitanyEngine);
 	p->addModel(modelSyzygy);
+	p->addModel(modelConclaveOfHollowRadiance);
 	p->addModel(modelEternalEclipse);
 }
