@@ -263,7 +263,9 @@ struct StarDisplay : TransparentWidget {
 				continue;
 			Vec p0 = mm2px(starPoint(i, 13.f).minus(Vec(STAR_X, STAR_Y)));
 			Vec p1 = mm2px(starPoint(i, STAR_R - 3.f).minus(Vec(STAR_X, STAR_Y)));
-			nvgStrokeColor(args.vg, nvgRGBAf(1.f, 0.77f, 0.39f, 0.08f + 0.7f * level[i]));
+			// Abyssal Harmonics red, like the Syzygy beads: each ray breathes
+			// with its own singer's loudness
+			nvgStrokeColor(args.vg, nvgRGBAf(1.f, 0.f, 0.f, 0.1f + 0.8f * level[i]));
 			nvgBeginPath(args.vg);
 			nvgMoveTo(args.vg, p0.x, p0.y);
 			nvgLineTo(args.vg, p1.x, p1.y);
