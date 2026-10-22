@@ -20,12 +20,13 @@ TOP, FRAME_H = 16.0, 106.5
 CTRL_X, CTRL_W = 108.0, 46.0
 BAY_X, BAY_W = 158.0, 41.2
 
-# The star of Ishtar: eight slender points on a ring, two inset outlines
-# following the edges, a bullseye at the heart. The singers' buttons sit
-# just beyond the tips (see VesperSwarm.cpp) so the points stay sharp.
+# The star of Ishtar: two four-pointed stars, one laid over the other at
+# 45 degrees, each with nested bands following its edges, and a bullseye at
+# the heart. The singers' buttons sit just beyond the tips (see
+# VesperSwarm.cpp) so the points stay sharp.
 STAR_CX, STAR_CY, STAR_R = 54.0, 69.25, 40.0
-STAR_INNER = 0.42 * STAR_R      # radius of the notches between points
-STAR_INSETS = (1.6, 3.2)        # mm, the nested outlines
+STAR_INNER = 0.42 * STAR_R      # radius of the notches of the eight-point silhouette
+STAR_INSETS = (1.4, 2.8, 4.2)   # mm, the nested bands of each four-pointed star
 RING_IN, RING_OUT = 41.0, 51.0  # the singers' ring: buttons at 46 sit between
 
 
@@ -55,12 +56,34 @@ glyph = (
 )
 
 
-# Sixteen-vertex star polygon: tips at STAR_R, notches at STAR_INNER
-def star_polygon(inset=0.0):
+# Notch radius of one four-pointed star such that its edges cross the other
+# star's edges at STAR_INNER, keeping the eight-point silhouette
+def four_star_notch():
+    d = (math.cos(math.radians(22.5)), math.sin(math.radians(22.5)))
+    P = (STAR_R, 0.0)
+    lo, hi = 0.0, STAR_R
+    for _ in range(60):
+        r4 = 0.5 * (lo + hi)
+        Q = (r4 * math.cos(math.radians(45.0)), r4 * math.sin(math.radians(45.0)))
+        E = (Q[0] - P[0], Q[1] - P[1])
+        u = -(P[0] * d[1] - P[1] * d[0]) / (E[0] * d[1] - E[1] * d[0])
+        X = (P[0] + u * E[0], P[1] + u * E[1])
+        # A deeper notch pulls the crossing inward
+        if math.hypot(X[0], X[1]) > STAR_INNER:
+            hi = r4
+        else:
+            lo = r4
+    return 0.5 * (lo + hi)
+
+
+# Eight-vertex four-pointed star: tips at STAR_R every 90 degrees from
+# `rot`, notches between them. Inset bands follow the edges inward.
+def star_polygon(rot=-90.0, inset=0.0):
+    r4 = four_star_notch()
     pts = []
-    for k in range(16):
-        r = STAR_R if k % 2 == 0 else STAR_INNER
-        a = math.radians(-90.0 + 22.5 * k)
+    for k in range(8):
+        r = STAR_R if k % 2 == 0 else r4
+        a = math.radians(rot + 45.0 * k)
         pts.append((STAR_CX + r * math.cos(a), STAR_CY + r * math.sin(a)))
     if inset <= 0.0:
         return pts
@@ -109,10 +132,12 @@ svg.append(f'  <rect x="0" y="0" width="{W}" height="{H}" fill="#000000"/>\n\n')
 svg.append(divider)
 svg.append(glyph)
 
-svg.append("\n  <!-- The star of Ishtar: the eight singers stand beyond its points -->\n")
-svg.append(f'  <path d="{path_of(star_polygon())}" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="12"/>\n')
-for d in STAR_INSETS:
-    svg.append(f'  <path d="{path_of(star_polygon(d))}" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="12"/>\n')
+svg.append("\n  <!-- The star of Ishtar: the eight singers stand beyond its points.\n"
+           "       The diagonal four-pointed star lies under the upright one. -->\n")
+for rot in (-45.0, -90.0):
+    svg.append(f'  <path d="{path_of(star_polygon(rot))}" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
+    for d in STAR_INSETS:
+        svg.append(f'  <path d="{path_of(star_polygon(rot, d))}" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>\n')
 svg.append("  <!-- The singers' ring, just outside the points -->\n")

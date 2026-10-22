@@ -21,10 +21,16 @@
   <!-- Chamber glyph: the evening star, eight-pointed -->
   <path d="M 101.600,9.200 L 101.857,10.179 L 102.731,9.669 L 102.221,10.543 L 103.200,10.800 L 102.221,11.057 L 102.731,11.931 L 101.857,11.421 L 101.600,12.400 L 101.343,11.421 L 100.469,11.931 L 100.979,11.057 L 100.000,10.800 L 100.979,10.543 L 100.469,9.669 L 101.343,10.179 Z" fill="none" stroke="#ffc464" stroke-width="0.3" stroke-opacity="0.9" stroke-linejoin="round"/>
 
-  <!-- The star of Ishtar: the eight singers stand beyond its points -->
-  <path d="M 54.00,29.25 L 60.43,53.73 L 82.28,40.97 L 69.52,62.82 L 94.00,69.25 L 69.52,75.68 L 82.28,97.53 L 60.43,84.77 L 54.00,109.25 L 47.57,84.77 L 25.72,97.53 L 38.48,75.68 L 14.00,69.25 L 38.48,62.82 L 25.72,40.97 L 47.57,53.73 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="12"/>
-  <path d="M 54.00,35.55 L 59.42,56.17 L 77.83,45.42 L 67.08,63.83 L 87.70,69.25 L 67.08,74.67 L 77.83,93.08 L 59.42,82.33 L 54.00,102.95 L 48.58,82.33 L 30.17,93.08 L 40.92,74.67 L 20.30,69.25 L 40.92,63.83 L 30.17,45.42 L 48.58,56.17 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="12"/>
-  <path d="M 54.00,41.85 L 58.40,58.62 L 73.38,49.87 L 64.63,64.85 L 81.40,69.25 L 64.63,73.65 L 73.38,88.63 L 58.40,79.88 L 54.00,96.65 L 49.60,79.88 L 34.62,88.63 L 43.37,73.65 L 26.60,69.25 L 43.37,64.85 L 34.62,49.87 L 49.60,58.62 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="12"/>
+  <!-- The star of Ishtar: the eight singers stand beyond its points.
+       The diagonal four-pointed star lies under the upright one. -->
+  <path d="M 82.28,40.97 L 65.77,69.25 L 82.28,97.53 L 54.00,81.02 L 25.72,97.53 L 42.23,69.25 L 25.72,40.97 L 54.00,57.48 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 78.39,44.86 L 64.15,69.25 L 78.39,93.64 L 54.00,79.40 L 29.61,93.64 L 43.85,69.25 L 29.61,44.86 L 54.00,59.10 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 74.49,48.76 L 62.52,69.25 L 74.49,89.74 L 54.00,77.77 L 33.51,89.74 L 45.48,69.25 L 33.51,48.76 L 54.00,60.73 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 70.59,52.66 L 60.90,69.25 L 70.59,85.84 L 54.00,76.15 L 37.41,85.84 L 47.10,69.25 L 37.41,52.66 L 54.00,62.35 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 54.00,29.25 L 62.32,60.93 L 94.00,69.25 L 62.32,77.57 L 54.00,109.25 L 45.68,77.57 L 14.00,69.25 L 45.68,60.93 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 54.00,34.76 L 61.17,62.08 L 88.49,69.25 L 61.17,76.42 L 54.00,103.74 L 46.83,76.42 L 19.51,69.25 L 46.83,62.08 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 54.00,40.27 L 60.03,63.22 L 82.98,69.25 L 60.03,75.28 L 54.00,98.23 L 47.97,75.28 L 25.02,69.25 L 47.97,63.22 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
+  <path d="M 54.00,45.78 L 58.88,64.37 L 77.47,69.25 L 58.88,74.13 L 54.00,92.72 L 49.12,74.13 L 30.53,69.25 L 49.12,64.37 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="16"/>
   <circle cx="54.00" cy="69.25" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>
   <circle cx="54.00" cy="69.25" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>
   <!-- The singers' ring, just outside the points -->
