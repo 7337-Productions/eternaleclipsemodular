@@ -1,3 +1,4 @@
+#include <atomic>
 #include "plugin.hpp"
 #include "EclipseWidgets.hpp"
 #include "ConclaveOfHollowRadiance/dsp/Circle.hpp"
@@ -10,8 +11,11 @@
 // into the previous channel, channel 1 into channel 4. One stereo send with
 // a return that enters the master (POST) or channel 1 (LOOP), MATTER to
 // darken every comb, MASTER, and a lookahead limiter before the outputs.
-// The engine lives in dsp/Circle.hpp; this file is the Rack module and a
-// provisional panel (the Circle and Triangle of Solomon come in phase 4).
+// The engine lives in dsp/Circle.hpp; this file is the Rack module and its
+// panel, the Circle and Triangle of Solomon, with the lights that show the
+// ring at work: the chain glowing clockwise along the band, feedback
+// glowing counter-clockwise in red, and the Triangle's circle burning with
+// the limiter's gain reduction.
 
 using conclave::CHANNELS;
 
@@ -56,6 +60,13 @@ struct ConclaveOfHollowRadiance : Module {
 	dsp::ClockDivider divider;
 	bool expResponse[CHANNELS] = {false, false, false, false};
 	bool ceiling10 = false;
+	int clipHold = 0; // samples left on the hard-clip flag, for the display
+
+	// audio -> UI, refreshed once per block
+	std::atomic<float> dispLevel[CHANNELS]; // chained output level leaving each channel, 0..1
+	std::atomic<float> dispFeed[CHANNELS];  // feedback arriving at each channel, 0..1
+	std::atomic<float> dispGR{0.f};         // limiter gain reduction, 0..1
+	std::atomic<bool> dispClip{false};      // the hard clip engaged in the last 0.3 s
 
 	struct MatterQuantity : ParamQuantity {
 		std::string getDisplayValueString() override {
@@ -94,6 +105,10 @@ struct ConclaveOfHollowRadiance : Module {
 		configBypass(INL_INPUTS + 0, MASTERL_OUTPUT);
 		configBypass(INR_INPUTS + 0, MASTERR_OUTPUT);
 		divider.setDivision(16);
+		for (int n = 0; n < CHANNELS; n++) {
+			dispLevel[n].store(0.f);
+			dispFeed[n].store(0.f);
+		}
 	}
 
 	// Knob state the engine recomputes coefficients from (once per block)
@@ -155,7 +170,11 @@ struct ConclaveOfHollowRadiance : Module {
 				float gain = std::fabs(circle.p.feed[n]) * circle.p.level[prev];
 				float b = gain >= 1.f ? 1.f : (std::fabs(circle.p.feed[n]) > 0.03f ? 0.25f : 0.f);
 				lights[FEED_LIGHTS + n].setBrightness(b);
+				dispLevel[n].store(clamp(circle.peak[n] / 5.f, 0.f, 1.f), std::memory_order_relaxed);
+				dispFeed[n].store(clamp(circle.fbPeak[n] / 5.f, 0.f, 1.f), std::memory_order_relaxed);
 			}
+			dispGR.store(circle.limiter.gainReduction, std::memory_order_relaxed);
+			dispClip.store(clipHold > 0, std::memory_order_relaxed);
 		}
 
 		// Levels follow the CV every sample
@@ -175,6 +194,10 @@ struct ConclaveOfHollowRadiance : Module {
 
 		conclave::CircleOut out;
 		circle.process(in, out);
+		if (circle.limiter.clipped)
+			clipHold = (int)(0.3f * args.sampleRate);
+		else if (clipHold > 0)
+			clipHold--;
 
 		for (int n = 0; n < CHANNELS; n++) {
 			outputs[OUTL_OUTPUTS + n].setVoltage(out.out[n].l);
@@ -187,6 +210,137 @@ struct ConclaveOfHollowRadiance : Module {
 	}
 };
 
+// Panel geometry shared by the display and the widget (mm). Mirrors
+// tools/gen_conclave_panel.py.
+namespace geo {
+static constexpr float W = 233.68f; // 46 HP
+static constexpr float CX = 99.09f, CY = 70.45f;     // the Circle
+static constexpr float R_OUT = 53.f, R_IN = 45.f;    // the two rings
+static constexpr float R_TEXT = 49.f;                // the band's centre line (seals, lights)
+static constexpr float R_TRIO = 39.5f;               // SEND / FEED / TUNE
+static constexpr float R_LEVEL = 22.f;               // LEVEL, on the chain ring
+static constexpr float TRI_CX = 156.09f + 45.f / 3.f; // the Triangle's centroid (171.09)
+static constexpr float R_TRI_INNER = 13.f;           // the Triangle's circle
+static constexpr float QUARTER[CHANNELS] = {-90.f, 0.f, 90.f, 180.f}; // channel 1 north, then clockwise
+
+inline Vec polar(float r, float deg) {
+	float a = deg * (float)M_PI / 180.f;
+	return Vec(CX + r * std::cos(a), CY + r * std::sin(a));
+}
+} // namespace geo
+
+// The lights, drawn in layer 1 so they burn at full brightness in a dimmed
+// room. The chain glows clockwise along the inside of the band, brighter
+// with the level leaving each channel, and a soft highlight travels round
+// each quarter at a pace set by that level, lighting the names it passes.
+// Feedback glows counter-clockwise just inside the inner ring, in Abyssal
+// red, brighter with what each channel receives. The Triangle's circle
+// fills with the limiter's gain reduction: copper while limiting, red when
+// the hard clip has engaged. In the module browser it shows a quiet
+// evening's worth of activity.
+struct ConclaveDisplay : TransparentWidget {
+	ConclaveOfHollowRadiance* module = NULL;
+	float phase[CHANNELS] = {0.f, 22.f, 45.f, 67.f}; // degrees into each quarter
+	float grDisp = 0.f;
+
+	static NVGcolor copper(float a) { return nvgRGBAf(1.f, 0.569f, 0.161f, a); }
+	static NVGcolor red(float a) { return nvgRGBAf(1.f, 0.f, 0.f, a); }
+	static float rad(float deg) { return deg * (float)M_PI / 180.f; }
+
+	void drawLayer(const DrawArgs& args, int layer) override {
+		if (layer != 1)
+			return;
+		float level[CHANNELS], feed[CHANNELS], gr;
+		bool clip;
+		if (module) {
+			for (int n = 0; n < CHANNELS; n++) {
+				level[n] = module->dispLevel[n].load(std::memory_order_relaxed);
+				feed[n] = module->dispFeed[n].load(std::memory_order_relaxed);
+			}
+			gr = module->dispGR.load(std::memory_order_relaxed);
+			clip = module->dispClip.load(std::memory_order_relaxed);
+		}
+		else {
+			const float L[CHANNELS] = {0.55f, 0.4f, 0.7f, 0.3f};
+			const float F[CHANNELS] = {0.35f, 0.f, 0.5f, 0.2f};
+			for (int n = 0; n < CHANNELS; n++) {
+				level[n] = L[n];
+				feed[n] = F[n];
+			}
+			gr = 0.3f;
+			clip = false;
+		}
+		float dt = APP->window->getLastFrameDuration();
+		dt = clamp(dt, 0.f, 0.1f);
+		// Attack at once, release over half a second
+		grDisp = std::fmax(gr, grDisp - 2.f * dt);
+
+		NVGcontext* vg = args.vg;
+		nvgSave(vg);
+		nvgLineCap(vg, NVG_ROUND);
+		Vec c = mm2px(Vec(geo::CX, geo::CY));
+
+		for (int n = 0; n < CHANNELS; n++) {
+			float q0 = geo::QUARTER[n], q1 = q0 + 90.f;
+			// The chain, clockwise from this channel's seal to the next
+			if (level[n] > 0.004f) {
+				nvgStrokeWidth(vg, mm2px(1.4f));
+				nvgStrokeColor(vg, copper(0.1f + 0.55f * level[n]));
+				nvgBeginPath(vg);
+				nvgArc(vg, c.x, c.y, mm2px(geo::R_IN + 1.2f), rad(q0 + 5.f), rad(q1 - 5.f), NVG_CW);
+				nvgStroke(vg);
+
+				// The travelling light, lighting the names as it goes
+				phase[n] += dt * (25.f + 150.f * level[n]);
+				while (phase[n] >= 90.f)
+					phase[n] -= 90.f;
+				float a = q0 + phase[n];
+				float glow = 0.12f + 0.3f * level[n];
+				nvgStrokeWidth(vg, mm2px(geo::R_OUT - geo::R_IN));
+				nvgStrokeColor(vg, copper(0.35f * glow));
+				nvgBeginPath(vg);
+				nvgArc(vg, c.x, c.y, mm2px(geo::R_TEXT), rad(a - 13.f), rad(a + 13.f), NVG_CW);
+				nvgStroke(vg);
+				nvgStrokeColor(vg, copper(glow));
+				nvgBeginPath(vg);
+				nvgArc(vg, c.x, c.y, mm2px(geo::R_TEXT), rad(a - 5.f), rad(a + 5.f), NVG_CW);
+				nvgStroke(vg);
+			}
+			// Feedback, counter-clockwise from the next channel's seal back to this one
+			if (feed[n] > 0.004f) {
+				nvgStrokeWidth(vg, mm2px(0.9f));
+				nvgStrokeColor(vg, red(0.15f + 0.8f * feed[n]));
+				nvgBeginPath(vg);
+				nvgArc(vg, c.x, c.y, mm2px(geo::R_IN - 0.9f), rad(q1 - 5.f), rad(q0 + 5.f), NVG_CCW);
+				nvgStroke(vg);
+			}
+		}
+
+		// The Triangle's circle: the spirit manifests
+		if (grDisp > 0.003f) {
+			Vec t = mm2px(Vec(geo::TRI_CX, geo::CY));
+			float rIn = mm2px(7.62f + 0.7f), rOut = mm2px(geo::R_TRI_INNER - 0.5f);
+			NVGcolor col = clip ? red(0.85f * grDisp) : copper(0.8f * grDisp);
+			nvgStrokeWidth(vg, rOut - rIn);
+			nvgStrokeColor(vg, col);
+			nvgBeginPath(vg);
+			nvgCircle(vg, t.x, t.y, 0.5f * (rIn + rOut));
+			nvgStroke(vg);
+			// and a halo beyond the circle
+			float rHalo = mm2px(geo::R_TRI_INNER + 5.f);
+			NVGcolor inner = clip ? red(0.35f * grDisp) : copper(0.3f * grDisp);
+			NVGcolor outer = clip ? red(0.f) : copper(0.f);
+			nvgFillPaint(vg, nvgRadialGradient(vg, t.x, t.y, rOut, rHalo, inner, outer));
+			nvgBeginPath(vg);
+			nvgCircle(vg, t.x, t.y, rHalo);
+			nvgCircle(vg, t.x, t.y, rOut);
+			nvgPathWinding(vg, NVG_HOLE);
+			nvgFill(vg);
+		}
+		nvgRestore(vg);
+	}
+};
+
 // The panel: the Circle and Triangle of Solomon, the Triangle to the east.
 // The four channels stand at the quarters of the Circle (1 north, then
 // clockwise, the way the chain runs): LEVEL on the chain ring, SEND / FEED /
@@ -195,23 +349,16 @@ struct ConclaveOfHollowRadiance : Module {
 // above the Triangle, MATTER below. Inputs bay on the far left, outs and the
 // loop on the far right. Geometry constants mirror tools/gen_conclave_panel.py.
 struct ConclaveOfHollowRadianceWidget : ModuleWidget {
-	static constexpr float W = 233.68f; // 46 HP
+	static constexpr float W = geo::W, CX = geo::CX, CY = geo::CY;
+	static constexpr float R_TEXT = geo::R_TEXT, R_TRIO = geo::R_TRIO, R_LEVEL = geo::R_LEVEL;
+	static constexpr float TRI_CX = geo::TRI_CX;
 	static constexpr float XC = W / 2.f;
-	static constexpr float CX = 99.09f, CY = 70.45f;    // the Circle
-	static constexpr float R_TEXT = 49.f;               // the band's centre line (seals, lights)
-	static constexpr float R_TRIO = 39.5f;              // SEND / FEED / TUNE
-	static constexpr float R_LEVEL = 22.f;              // LEVEL, on the chain ring
+	static Vec polar(float r, float deg) { return geo::polar(r, deg); }
 	static constexpr float R_NUMERAL = 11.f;            // channel numerals, inside the LEVEL knobs
 	static constexpr float R_TRIO_LABEL = 33.2f;        // the east and west clusters' turned labels
-	static constexpr float TRI_CX = 156.09f + 45.f / 3.f; // the Triangle's centroid (171.09)
 	static constexpr float BAY_L_COL[3] = {13.f, 23.5f, 34.f};
 	static constexpr float BAY_R_COL[2] = {213.18f, 223.68f};
 	static constexpr float BAY_ROW0 = 32.f, BAY_STEP = 14.3f; // both bays share the row grid
-
-	static Vec polar(float r, float deg) {
-		float a = deg * (float)M_PI / 180.f;
-		return Vec(CX + r * std::cos(a), CY + r * std::sin(a));
-	}
 
 	void addJack(float x, float y, int id, bool output) {
 		if (output)
@@ -224,6 +371,12 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 		setModule(module);
 		setPanel(createPanel(asset::plugin(pluginInstance, "res/ConclaveOfHollowRadiance.svg")));
 
+		ConclaveDisplay* display = new ConclaveDisplay;
+		display->module = module;
+		display->box.pos = Vec(0.f, 0.f);
+		display->box.size = box.size;
+		addChild(display);
+
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(box.size.x - 2 * RACK_GRID_WIDTH, 0)));
 		addChild(createWidget<ScrewBlack>(Vec(RACK_GRID_WIDTH, RACK_GRID_HEIGHT - RACK_GRID_WIDTH)));
@@ -232,9 +385,8 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 		eclipse::addHeader(this, XC, "C O N C L A V E   O F   H O L L O W   R A D I A N C E");
 
 		// The Circle: a channel at each quarter, north first, clockwise
-		const float QUARTER[CHANNELS] = {-90.f, 0.f, 90.f, 180.f};
 		for (int n = 0; n < CHANNELS; n++) {
-			float q = QUARTER[n];
+			float q = geo::QUARTER[n];
 			Vec level = polar(R_LEVEL, q);
 			addParam(createParamCentered<RoundBigBlackKnob>(mm2px(level), module, ConclaveOfHollowRadiance::LEVEL_PARAMS + n));
 			eclipse::addLabel(this, polar(R_NUMERAL, q), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);

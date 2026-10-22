@@ -162,7 +162,8 @@ struct Circle {
 	CircleParams p;
 	Comb comb[CHANNELS];
 	Limiter limiter;
-	float peak[CHANNELS] = {0.f, 0.f, 0.f, 0.f}; // channel output peaks, for the display
+	float peak[CHANNELS] = {0.f, 0.f, 0.f, 0.f};   // channel output peaks, for the display
+	float fbPeak[CHANNELS] = {0.f, 0.f, 0.f, 0.f}; // feedback arriving at each channel, for the display
 	float peakDecay = 0.999f;
 
 	Circle() {
@@ -182,6 +183,7 @@ struct Circle {
 		for (int n = 0; n < CHANNELS; n++) {
 			comb[n].reset();
 			peak[n] = 0.f;
+			fbPeak[n] = 0.f;
 		}
 		peakDecay = std::exp(-1.f / (PEAK_HOLD_S * sr));
 		limiter.reset(sr);
@@ -239,6 +241,7 @@ struct Circle {
 
 		Frame chain, sendBus;
 		for (int n = 0; n < CHANNELS; n++) {
+			fbPeak[n] = std::fmax(std::fmax(std::fabs(fb[n].l), std::fabs(fb[n].r)), fbPeak[n] * peakDecay);
 			Frame x = in.in[n] + fb[n];
 			if (n == 0 && p.loopReturn)
 				x = x + in.ret * p.ret;
