@@ -187,21 +187,36 @@ struct ConclaveOfHollowRadiance : Module {
 	}
 };
 
-// Provisional panel: one strip per channel, the master column, the jacks in
-// two bays. Laid out to be usable for listening tests; the Circle and
-// Triangle of Solomon replace it in phase 4.
+// The panel: the Circle and Triangle of Solomon, the Triangle to the east.
+// The four channels stand at the quarters of the Circle (1 north, then
+// clockwise, the way the chain runs): LEVEL on the chain ring, SEND / FEED /
+// TUNE on the arc inside the band, the FEED light in the quarter seal on the
+// band. MASTER sits in the Triangle's inner circle, RETURN and its routing
+// above the Triangle, MATTER below. Inputs bay on the far left, outs and the
+// loop on the far right. Geometry constants mirror tools/gen_conclave_panel.py.
 struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 	static constexpr float W = 223.52f; // 44 HP
 	static constexpr float XC = W / 2.f;
+	static constexpr float CX = 90.f, CY = 70.45f;      // the Circle
+	static constexpr float R_TEXT = 44.f;               // the band's centre line (seals, lights)
+	static constexpr float R_TRIO = 34.5f;              // SEND / FEED / TUNE
+	static constexpr float R_LEVEL = 19.f;              // LEVEL, on the chain ring
+	static constexpr float TRI_CX = 156.f;              // the Triangle's centroid
+	static constexpr float BAY_L_COL[3] = {12.f, 23.f, 34.f};
+	static constexpr float BAY_L_ROW[CHANNELS] = {38.f, 60.f, 82.f, 104.f};
+	static constexpr float BAY_R_COL[2] = {198.f, 212.5f};
+	static constexpr float BAY_R_ROW0 = 32.f, BAY_R_STEP = 14.3f;
 
-	void addJack(float x, float y, int id, bool output, const std::string& label, bool labelBelow = true) {
+	static Vec polar(float r, float deg) {
+		float a = deg * (float)M_PI / 180.f;
+		return Vec(CX + r * std::cos(a), CY + r * std::sin(a));
+	}
+
+	void addJack(float x, float y, int id, bool output) {
 		if (output)
 			addOutput(createOutputCentered<PJ301MPort>(mm2px(Vec(x, y)), module, id));
 		else
 			addInput(createInputCentered<PJ301MPort>(mm2px(Vec(x, y)), module, id));
-		if (!label.empty())
-			eclipse::addLabel(this, Vec(x, y + (labelBelow ? 6.4f : -6.4f)), label, eclipse::LABEL_SIZE,
-				output ? eclipse::ACCENT_COLOR : eclipse::LABEL_COLOR);
 	}
 
 	ConclaveOfHollowRadianceWidget(ConclaveOfHollowRadiance* module) {
@@ -215,50 +230,69 @@ struct ConclaveOfHollowRadianceWidget : ModuleWidget {
 
 		eclipse::addHeader(this, XC, "C O N C L A V E   O F   H O L L O W   R A D I A N C E");
 
-		// Channel strips: a row per channel
-		const float ROW_Y[CHANNELS] = {33.f, 57.f, 81.f, 105.f};
-		const float X_INL = 11.f, X_INR = 23.f, X_CV = 35.f;
-		const float X_LEVEL = 56.f, X_SEND = 75.f, X_FEED = 91.f, X_TUNE = 107.f;
-		const float X_OUTL = 125.f, X_OUTR = 137.f;
+		// The Circle: a channel at each quarter, north first, clockwise
+		const float QUARTER[CHANNELS] = {-90.f, 0.f, 90.f, 180.f};
 		for (int n = 0; n < CHANNELS; n++) {
-			float y = ROW_Y[n];
-			addJack(X_INL, y, ConclaveOfHollowRadiance::INL_INPUTS + n, false, n == 0 ? "IN L" : "", false);
-			addJack(X_INR, y, ConclaveOfHollowRadiance::INR_INPUTS + n, false, n == 0 ? "IN R" : "", false);
-			addJack(X_CV, y, ConclaveOfHollowRadiance::CV_INPUTS + n, false, n == 0 ? "CV" : "", false);
-			addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(X_LEVEL, y)), module, ConclaveOfHollowRadiance::LEVEL_PARAMS + n));
-			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(X_SEND, y)), module, ConclaveOfHollowRadiance::SEND_PARAMS + n));
-			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(X_FEED, y)), module, ConclaveOfHollowRadiance::FEED_PARAMS + n));
-			addChild(createLightCentered<SmallLight<RedLight>>(mm2px(Vec(X_FEED + 5.5f, y - 5.5f)), module, ConclaveOfHollowRadiance::FEED_LIGHTS + n));
-			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(X_TUNE, y)), module, ConclaveOfHollowRadiance::TUNE_PARAMS + n));
-			addJack(X_OUTL, y, ConclaveOfHollowRadiance::OUTL_OUTPUTS + n, true, n == 0 ? "OUT L" : "", false);
-			addJack(X_OUTR, y, ConclaveOfHollowRadiance::OUTR_OUTPUTS + n, true, n == 0 ? "OUT R" : "", false);
-			eclipse::addLabel(this, Vec(X_INL - 6.f, y), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+			float q = QUARTER[n];
+			Vec level = polar(R_LEVEL, q);
+			addParam(createParamCentered<RoundBigBlackKnob>(mm2px(level), module, ConclaveOfHollowRadiance::LEVEL_PARAMS + n));
+			eclipse::addLabel(this, polar(9.2f, q), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+
+			Vec send = polar(R_TRIO, q - 22.f), feed = polar(R_TRIO, q), tune = polar(R_TRIO, q + 22.f);
+			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(send), module, ConclaveOfHollowRadiance::SEND_PARAMS + n));
+			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(feed), module, ConclaveOfHollowRadiance::FEED_PARAMS + n));
+			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(tune), module, ConclaveOfHollowRadiance::TUNE_PARAMS + n));
+			// Labels sit 6.6 mm inward of their knobs; at east and west the
+			// FEED label would land on LEVEL, so it goes above its knob instead
+			eclipse::addLabel(this, polar(R_TRIO - 6.6f, q - 22.f), "SEND", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+			eclipse::addLabel(this, polar(R_TRIO - 6.6f, q + 22.f), "TUNE", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+			bool side = (n == 1 || n == 3);
+			eclipse::addLabel(this, side ? feed.plus(Vec(0.f, -6.2f)) : polar(R_TRIO - 6.6f, q), "FEED", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+
+			addChild(createLightCentered<SmallLight<RedLight>>(mm2px(polar(R_TEXT, q)), module, ConclaveOfHollowRadiance::FEED_LIGHTS + n));
 		}
-		eclipse::addLabel(this, Vec(X_LEVEL, 21.f), "LEVEL", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		eclipse::addLabel(this, Vec(X_SEND, 21.f), "SEND", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		eclipse::addLabel(this, Vec(X_FEED, 21.f), "FEED", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		eclipse::addLabel(this, Vec(X_TUNE, 21.f), "TUNE", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
 
-		// Master column
-		const float X_M = 166.f;
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X_M, 33.f)), module, ConclaveOfHollowRadiance::RETURN_PARAM));
-		eclipse::addLabel(this, Vec(X_M, 33.f + 7.2f), "RETURN", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		addParam(createParamCentered<eclipse::CKSSHorizontal>(mm2px(Vec(X_M, 50.f)), module, ConclaveOfHollowRadiance::LOOP_PARAM));
-		eclipse::addLabel(this, Vec(X_M - 9.f, 50.f), "POST", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
-		eclipse::addLabel(this, Vec(X_M + 9.f, 50.f), "LOOP", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X_M, 70.f)), module, ConclaveOfHollowRadiance::MATTER_PARAM));
-		eclipse::addLabel(this, Vec(X_M, 70.f + 7.2f), "MATTER", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
-		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(X_M, 100.f)), module, ConclaveOfHollowRadiance::MASTER_PARAM));
-		eclipse::addLabel(this, Vec(X_M, 100.f + 10.f), "MASTER", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		// The Triangle: MASTER within its circle, RETURN above, MATTER below
+		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(TRI_CX, CY)), module, ConclaveOfHollowRadiance::MASTER_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(TRI_CX, 29.f)), module, ConclaveOfHollowRadiance::RETURN_PARAM));
+		eclipse::addLabel(this, Vec(TRI_CX, 29.f + 7.2f), "RETURN", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
+		addParam(createParamCentered<eclipse::CKSSHorizontal>(mm2px(Vec(TRI_CX, 43.f)), module, ConclaveOfHollowRadiance::LOOP_PARAM));
+		eclipse::addLabel(this, Vec(TRI_CX - 9.5f, 43.f), "POST", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(TRI_CX + 9.5f, 43.f), "LOOP", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(TRI_CX, 101.f)), module, ConclaveOfHollowRadiance::MATTER_PARAM));
+		eclipse::addLabel(this, Vec(TRI_CX, 101.f + 7.2f), "MATTER", eclipse::LABEL_SIZE, eclipse::ACCENT_COLOR);
 
-		// Loop and master bay
-		const float X_BL = 195.f, X_BR = 208.f;
-		addJack(X_BL, 33.f, ConclaveOfHollowRadiance::SENDL_OUTPUT, true, "SEND L", false);
-		addJack(X_BR, 33.f, ConclaveOfHollowRadiance::SENDR_OUTPUT, true, "SEND R", false);
-		addJack(X_BL, 57.f, ConclaveOfHollowRadiance::RETL_INPUT, false, "RET L", false);
-		addJack(X_BR, 57.f, ConclaveOfHollowRadiance::RETR_INPUT, false, "RET R", false);
-		addJack(X_BL, 105.f, ConclaveOfHollowRadiance::MASTERL_OUTPUT, true, "OUT L", false);
-		addJack(X_BR, 105.f, ConclaveOfHollowRadiance::MASTERR_OUTPUT, true, "OUT R", false);
+		// Input bay: IN L, IN R, CV per channel
+		eclipse::addLabel(this, Vec(BAY_L_COL[0], 24.f), "IN L", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[1], 24.f), "IN R", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_L_COL[2], 24.f), "CV", eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		for (int n = 0; n < CHANNELS; n++) {
+			float y = BAY_L_ROW[n];
+			addJack(BAY_L_COL[0], y, ConclaveOfHollowRadiance::INL_INPUTS + n, false);
+			addJack(BAY_L_COL[1], y, ConclaveOfHollowRadiance::INR_INPUTS + n, false);
+			addJack(BAY_L_COL[2], y, ConclaveOfHollowRadiance::CV_INPUTS + n, false);
+			eclipse::addLabel(this, Vec(6.3f, y), string::f("%d", n + 1), eclipse::LABEL_SIZE, eclipse::LABEL_COLOR);
+		}
+
+		// Output bay: the four direct outs, the send, the return, the master
+		const char* ROW_LABEL[7] = {"OUT 1", "OUT 2", "OUT 3", "OUT 4", "SEND", "RETURN", "MASTER"};
+		const bool ROW_OUTPUT[7] = {true, true, true, true, true, false, true};
+		const int ROW_L[7] = {ConclaveOfHollowRadiance::OUTL_OUTPUTS + 0, ConclaveOfHollowRadiance::OUTL_OUTPUTS + 1,
+			ConclaveOfHollowRadiance::OUTL_OUTPUTS + 2, ConclaveOfHollowRadiance::OUTL_OUTPUTS + 3,
+			ConclaveOfHollowRadiance::SENDL_OUTPUT, ConclaveOfHollowRadiance::RETL_INPUT, ConclaveOfHollowRadiance::MASTERL_OUTPUT};
+		const int ROW_R[7] = {ConclaveOfHollowRadiance::OUTR_OUTPUTS + 0, ConclaveOfHollowRadiance::OUTR_OUTPUTS + 1,
+			ConclaveOfHollowRadiance::OUTR_OUTPUTS + 2, ConclaveOfHollowRadiance::OUTR_OUTPUTS + 3,
+			ConclaveOfHollowRadiance::SENDR_OUTPUT, ConclaveOfHollowRadiance::RETR_INPUT, ConclaveOfHollowRadiance::MASTERR_OUTPUT};
+		float mid = 0.5f * (BAY_R_COL[0] + BAY_R_COL[1]);
+		eclipse::addLabel(this, Vec(BAY_R_COL[0], 21.8f), "L", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
+		eclipse::addLabel(this, Vec(BAY_R_COL[1], 21.8f), "R", eclipse::FINE_SIZE, eclipse::LABEL_COLOR);
+		for (int r = 0; r < 7; r++) {
+			float y = BAY_R_ROW0 + r * BAY_R_STEP;
+			addJack(BAY_R_COL[0], y, ROW_L[r], ROW_OUTPUT[r]);
+			addJack(BAY_R_COL[1], y, ROW_R[r], ROW_OUTPUT[r]);
+			eclipse::addLabel(this, Vec(mid, y - 6.4f), ROW_LABEL[r], eclipse::LABEL_SIZE,
+				ROW_OUTPUT[r] ? eclipse::ACCENT_COLOR : eclipse::LABEL_COLOR);
+		}
 	}
 
 	void appendContextMenu(Menu* menu) override {
