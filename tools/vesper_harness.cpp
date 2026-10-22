@@ -152,6 +152,44 @@ int main() {
 		}
 	}
 
+	// ---- Envelope on the filter: level stays up, cutoff sweeps, stays finite ----
+	{
+		vesper::Choir choir;
+		vesper::ChoirParams p;
+		p.envToFilter = true;
+		p.cutoff = 80.f;
+		p.res = 0.8f;
+		p.attack = 0.05f;
+		p.decay = 0.1f;
+		p.sustain = 0.2f;
+		p.release = 0.1f;
+		float early = 0.f, late = 0.f;
+		int n = (int)(1.0f * RATE);
+		double accE = 0.0, accL = 0.0;
+		for (int i = 0; i < n; i++) {
+			p.gate = i < (int)(0.5f * RATE);
+			if (i % vesper::BLOCK == 0)
+				choir.setBlock(p, RATE);
+			float l, r;
+			choir.process(l, r);
+			if (!std::isfinite(l) || !std::isfinite(r)) {
+				std::printf("FAIL: non-finite with envelope on the filter\n");
+				return 1;
+			}
+			if (i >= (int)(0.04f * RATE) && i < (int)(0.08f * RATE))
+				accE += l * l;
+			if (i >= (int)(0.9f * RATE))
+				accL += l * l;
+		}
+		early = (float)std::sqrt(accE / (0.04f * RATE));
+		late = (float)std::sqrt(accL / (0.1f * RATE));
+		std::printf("env->vcf: open %.1f dB, closed (0.4 s after release) %.1f dB, still sounding\n", db(early), db(late));
+		if (late < 1e-4f || early < late) {
+			std::printf("FAIL: envelope on the filter\n");
+			return 1;
+		}
+	}
+
 	// ---- Voice toggling: no voices = silence, one voice = sound ----
 	{
 		vesper::Choir choir;

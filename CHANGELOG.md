@@ -9,7 +9,8 @@
   a few cents apart into a two-octave cluster, or into whole-number
   harmonics with the menu's Harmonic law. VOWEL morphs A E I O U,
   BREATH adds air, then a saturating 4-pole lowpass and a gate-driven
-  ADSR that drones unpatched. GLIDE for ribbon glissandi, V/OCT plus a
+  ADSR (attack to 60 s) that drones unpatched and can be pointed at the
+  filter instead of the level. GLIDE for ribbon glissandi, V/OCT plus a
   CV jack for every knob. The singers stand on the points of an
   eight-pointed star; a click silences or wakes one.
 

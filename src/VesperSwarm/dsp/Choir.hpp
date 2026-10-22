@@ -28,6 +28,7 @@ struct ChoirParams {
 	float cutoff = 20000.f; // Hz
 	float res = 0.f;        // 0..1
 	float attack = 0.15f, decay = 0.1f, sustain = 1.f, release = 0.4f; // s
+	bool envToFilter = false; // ADSR opens the filter instead of the amp
 };
 
 // Eight voices -> stereo mix -> 4-pole lowpass -> ADSR. Output in +/-1 units.
@@ -41,12 +42,15 @@ struct Choir {
 	corona::OtaFilter fltL, fltR;
 	uint8_t mask = 0xFF;
 	bool gate = true;
+	bool envToFilter = false;
 	float mixGain = 0.f;
 	float rawPeak = 0.f; // pre-clip peak since the last read
 
 	// Mix level: eight incoherent voices normalised by sqrt(count), then
 	// brought up to a healthy modular level before the safety clipper.
 	static constexpr float MAKEUP = 1.6f;
+	// Envelope -> filter: full envelope lifts the cutoff this many octaves
+	static constexpr float ENV_OCTAVES = 7.f;
 
 	Choir() {
 		for (int i = 0; i < VOICES; i++) {
@@ -90,7 +94,11 @@ struct Choir {
 		}
 		mixGain = active > 0 ? MAKEUP / std::sqrt((float)active) : 0.f;
 		env.setBlock(p.attack, p.decay, p.sustain, p.release, 1.f / sampleRate);
-		coeffs.update(p.cutoff, p.res, sampleRate);
+		envToFilter = p.envToFilter;
+		float cutoff = p.cutoff;
+		if (envToFilter)
+			cutoff = clampf(cutoff * std::exp2(ENV_OCTAVES * env.level), 20.f, sampleRate * 0.45f);
+		coeffs.update(cutoff, p.res, sampleRate);
 	}
 
 	void process(float& l, float& r) {
@@ -111,8 +119,10 @@ struct Choir {
 		sl = fltL.process(sl, coeffs, true);
 		sr = fltR.process(sr, coeffs, true);
 		float e = env.process(gate);
-		sl *= e;
-		sr *= e;
+		if (!envToFilter) {
+			sl *= e;
+			sr *= e;
+		}
 		float pk = std::fmax(std::fabs(sl), std::fabs(sr));
 		if (pk > rawPeak)
 			rawPeak = pk;

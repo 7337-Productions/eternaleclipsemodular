@@ -38,6 +38,7 @@ struct VesperSwarm : Module {
 		DECAY_PARAM,
 		SUSTAIN_PARAM,
 		RELEASE_PARAM,
+		ENV_DEST_PARAM,
 		ENUMS(VOICE_PARAMS, VOICES),
 		PARAMS_LEN
 	};
@@ -98,10 +99,12 @@ struct VesperSwarm : Module {
 		configParam(BREATH_PARAM, 0.f, 1.f, 0.2f, "Breath", "%", 0.f, 100.f);
 		configParam(CUTOFF_PARAM, 0.f, 1.f, 1.f, "Cutoff", " Hz", 1024.f, 20.f);
 		configParam(RES_PARAM, 0.f, 1.f, 0.f, "Resonance", "%", 0.f, 100.f);
-		configParam(ATTACK_PARAM, 0.f, 1.f, 0.55f, "Attack", " ms", 10000.f, 1.f);
+		configParam(ATTACK_PARAM, 0.f, 1.f, 0.455f, "Attack", " ms", 60000.f, 1.f);
 		configParam(DECAY_PARAM, 0.f, 1.f, 0.5f, "Decay", " ms", 10000.f, 1.f);
 		configParam(SUSTAIN_PARAM, 0.f, 1.f, 1.f, "Sustain", "%", 0.f, 100.f);
 		configParam(RELEASE_PARAM, 0.f, 1.f, 0.65f, "Release", " ms", 10000.f, 1.f);
+		configSwitch(ENV_DEST_PARAM, 0.f, 1.f, 0.f, "Envelope destination",
+			{"VCA: the envelope shapes the level", "VCF: the envelope opens the filter, the level stays up"});
 		for (int i = 0; i < VOICES; i++)
 			configSwitch(VOICE_PARAMS + i, 0.f, 1.f, 1.f, string::f("Singer %d", i + 1), {"Silent", "Singing"});
 
@@ -149,7 +152,10 @@ struct VesperSwarm : Module {
 		return vesper::clampf(v, lo, hi);
 	}
 
-	// Envelope knobs: 1 ms .. 10 s
+	// Envelope knobs: attack 1 ms .. 60 s, decay and release 1 ms .. 10 s
+	static float attackSeconds(float x) {
+		return 0.001f * std::pow(60000.f, x);
+	}
 	static float envSeconds(float x) {
 		return 0.001f * std::pow(10000.f, x);
 	}
@@ -192,21 +198,23 @@ struct VesperSwarm : Module {
 			+ vesper::clampf(inputs[CUTOFF_INPUT].getVoltage(), -10.f, 10.f);
 		prm.cutoff = vesper::clampf(20.f * std::exp2(cutoffExp), 20.f, std::min(20000.f, sr * 0.45f));
 		prm.res = knobCv(RES_PARAM, RES_INPUT, 0.f, 1.f);
-		prm.attack = envSeconds(knobCv(ATTACK_PARAM, ATTACK_INPUT, 0.f, 1.f));
+		prm.attack = attackSeconds(knobCv(ATTACK_PARAM, ATTACK_INPUT, 0.f, 1.f));
 		prm.decay = envSeconds(knobCv(DECAY_PARAM, DECAY_INPUT, 0.f, 1.f));
 		prm.sustain = knobCv(SUSTAIN_PARAM, SUSTAIN_INPUT, 0.f, 1.f);
 		prm.release = envSeconds(knobCv(RELEASE_PARAM, RELEASE_INPUT, 0.f, 1.f));
+		prm.envToFilter = params[ENV_DEST_PARAM].getValue() > 0.5f;
 
 		choir.setBlock(prm, sr);
 
-		float env = choir.env.level;
+		// With the envelope on the filter the level is always up
+		float amp = prm.envToFilter ? 1.f : choir.env.level;
 		dispVowel.store(prm.vowel, std::memory_order_relaxed);
 		dispMask.store(mask, std::memory_order_relaxed);
 		for (int i = 0; i < VOICES; i++) {
 			bool on = (mask >> i) & 1u;
-			float lvl = on ? vesper::clampf(choir.voicePeak[i] * env * 2.f, 0.f, 1.f) : 0.f;
+			float lvl = on ? vesper::clampf(choir.voicePeak[i] * amp * 2.f, 0.f, 1.f) : 0.f;
 			dispLevel[i].store(lvl, std::memory_order_relaxed);
-			lights[VOICE_LIGHTS + i].setBrightness(on ? (env > 0.01f ? 1.f : 0.25f) : 0.f);
+			lights[VOICE_LIGHTS + i].setBrightness(on ? (amp > 0.01f ? 1.f : 0.25f) : 0.f);
 		}
 	}
 
@@ -347,9 +355,12 @@ struct VesperSwarmWidget : ModuleWidget {
 		                          VesperSwarm::SUSTAIN_PARAM, VesperSwarm::RELEASE_PARAM};
 		static const char* EL[4] = {"ATK", "DEC", "SUS", "REL"};
 		for (int i = 0; i < 4; i++) {
-			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(EX[i], 107.f)), module, EP[i]));
-			addLabel(Vec(EX[i], 113.2f), EL[i]);
+			addParam(createParamCentered<RoundSmallBlackKnob>(mm2px(Vec(EX[i], 104.5f)), module, EP[i]));
+			addLabel(Vec(EX[i], 110.7f), EL[i]);
 		}
+		addParam(createParamCentered<eclipse::CKSSHorizontal>(mm2px(Vec(131.f, 117.8f)), module, VesperSwarm::ENV_DEST_PARAM));
+		addLabel(Vec(119.8f, 117.8f), "VCA", eclipse::FINE_SIZE);
+		addLabel(Vec(142.2f, 117.8f), "VCF", eclipse::FINE_SIZE);
 
 		// ===== Bay =====
 		addBayInput(BAY_C0, 0, "V/OCT", VesperSwarm::VOCT_INPUT, module);
