@@ -17,14 +17,6 @@
 
 using vesper::VOICES;
 
-// Abyssal Harmonics red for the singers' lights: pure #ff0000, the colour of
-// the Syzygy beads and the Coronal sigil, not Rack's stock red.
-struct AbyssalLight : GrayModuleLightWidget {
-	AbyssalLight() {
-		addBaseColor(nvgRGB(0xff, 0x00, 0x00));
-	}
-};
-
 struct VesperSwarm : Module {
 	enum ParamId {
 		PITCH_PARAM,
@@ -329,7 +321,7 @@ struct VesperSwarmWidget : ModuleWidget {
 		display->box.size = mm2px(Vec(STAR_W, STAR_H));
 		addChild(display);
 		for (int i = 0; i < VOICES; i++)
-			addParam(createLightParamCentered<VCVLightBezelLatch<AbyssalLight>>(
+			addParam(createLightParamCentered<eclipse::LightButton>(
 				mm2px(starPoint(i, BUTTON_R)), module, VesperSwarm::VOICE_PARAMS + i, VesperSwarm::VOICE_LIGHTS + i));
 
 		// ===== Controls =====
