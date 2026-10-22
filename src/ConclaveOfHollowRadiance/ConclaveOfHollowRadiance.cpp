@@ -195,17 +195,17 @@ struct ConclaveOfHollowRadiance : Module {
 // above the Triangle, MATTER below. Inputs bay on the far left, outs and the
 // loop on the far right. Geometry constants mirror tools/gen_conclave_panel.py.
 struct ConclaveOfHollowRadianceWidget : ModuleWidget {
-	static constexpr float W = 243.84f; // 48 HP
+	static constexpr float W = 233.68f; // 46 HP
 	static constexpr float XC = W / 2.f;
-	static constexpr float CX = 99.5f, CY = 70.45f;     // the Circle
+	static constexpr float CX = 99.09f, CY = 70.45f;    // the Circle
 	static constexpr float R_TEXT = 49.f;               // the band's centre line (seals, lights)
 	static constexpr float R_TRIO = 39.5f;              // SEND / FEED / TUNE
 	static constexpr float R_LEVEL = 22.f;              // LEVEL, on the chain ring
 	static constexpr float R_NUMERAL = 11.f;            // channel numerals, inside the LEVEL knobs
 	static constexpr float R_TRIO_LABEL = 33.2f;        // the east and west clusters' turned labels
-	static constexpr float TRI_CX = 156.5f + 45.f / 3.f; // the Triangle's centroid (171.5)
+	static constexpr float TRI_CX = 156.09f + 45.f / 3.f; // the Triangle's centroid (171.09)
 	static constexpr float BAY_L_COL[3] = {13.f, 23.5f, 34.f};
-	static constexpr float BAY_R_COL[2] = {215.9f, 231.9f};
+	static constexpr float BAY_R_COL[2] = {213.18f, 223.68f};
 	static constexpr float BAY_ROW0 = 32.f, BAY_STEP = 14.3f; // both bays share the row grid
 
 	static Vec polar(float r, float deg) {

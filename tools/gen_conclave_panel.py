@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Generate res/ConclaveOfHollowRadiance.svg (48 HP).
+"""Generate res/ConclaveOfHollowRadiance.svg (46 HP).
 
 The Circle and Triangle of Solomon from the Goetia, turned so the Triangle
 of Art points east. The Circle is a double ring with the serpent's band
@@ -29,7 +29,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[1]
 SYZYGY = (ROOT / "res" / "Syzygy.svg").read_text(encoding="utf-8")
 FONT_PATH = pathlib.Path(r"C:\Users\nicho\Claude\RelicsOfTheEternalEclipse\medallions-of-the-seventy-two\fonts\Cinzel-Variable.ttf")
 
-W, H = 243.84, 128.5
+W, H = 233.68, 128.5
 CX_PANEL = W / 2.0
 SYZYGY_CX = 101.6
 SHIFT = CX_PANEL - SYZYGY_CX
@@ -37,9 +37,9 @@ TOP, BOTTOM = 18.0, 122.9
 
 # ---- geometry (mirrored in the .cpp) ----
 BAY_L_X, BAY_L_W = 3.0, 38.0
-BAY_R_X, BAY_R_W = 207.0, 33.84
+BAY_R_X, BAY_R_W = 206.18, 24.5   # two jack columns 10.5 mm apart, 3 mm of air each side, like the left bay
 
-CX, CY = 99.5, 70.45          # the Circle (the Coronal Annihilator's 53 mm ring); 5.5 mm off the left bay
+CX, CY = 99.09, 70.45         # the Circle (the Coronal Annihilator's 53 mm ring); 5.09 mm off the left bay
 R_OUT, R_IN = 53.0, 45.0      # the two rings; the serpent's band lies between
 R_TEXT = 49.0                 # centre line of the band
 R_TRIO = 39.5                 # SEND / FEED / TUNE knobs
@@ -48,8 +48,8 @@ R_SEAL = 3.4                  # quarter seals (hexagrams) on the band
 R_CORE = 6.5                  # the hexagram at the heart
 SEAL_GAP_DEG = 6.5            # the band's names stop this far either side of a seal
 
-TRI_BASE_X, TRI_HALF, TRI_APEX_X = 156.5, 26.0, 201.5   # the Triangle of Art, pointing east; apex 5.5 mm off the right bay
-TRI_CX = TRI_BASE_X + (TRI_APEX_X - TRI_BASE_X) / 3.0   # centroid x (171.5)
+TRI_BASE_X, TRI_HALF, TRI_APEX_X = 156.09, 26.0, 201.09   # the Triangle of Art, pointing east; apex 5.09 mm off the right bay
+TRI_CX = TRI_BASE_X + (TRI_APEX_X - TRI_BASE_X) / 3.0   # centroid x (171.09)
 TRI_CY = CY
 R_TRI_INNER = 13.0
 
