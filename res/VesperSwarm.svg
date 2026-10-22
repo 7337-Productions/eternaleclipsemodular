@@ -23,13 +23,13 @@
 
   <!-- The star of Ishtar: the eight singers stand beyond its points -->
   <path d="M 54.00,29.25 L 60.43,53.73 L 82.28,40.97 L 69.52,62.82 L 94.00,69.25 L 69.52,75.68 L 82.28,97.53 L 60.43,84.77 L 54.00,109.25 L 47.57,84.77 L 25.72,97.53 L 38.48,75.68 L 14.00,69.25 L 38.48,62.82 L 25.72,40.97 L 47.57,53.73 Z" fill="#140c06" stroke="#ffc464" stroke-width="0.5" stroke-linejoin="miter" stroke-miterlimit="12"/>
-  <path d="M 54.00,35.55 L 59.42,56.17 L 77.83,45.42 L 67.08,63.83 L 87.70,69.25 L 67.08,74.67 L 77.83,93.08 L 59.42,82.33 L 54.00,102.95 L 48.58,82.33 L 30.17,93.08 L 40.92,74.67 L 20.30,69.25 L 40.92,63.83 L 30.17,45.42 L 48.58,56.17 Z" fill="none" stroke="#cd762b" stroke-width="0.35" stroke-opacity="0.9" stroke-linejoin="miter" stroke-miterlimit="12"/>
-  <path d="M 54.00,41.85 L 58.40,58.62 L 73.38,49.87 L 64.63,64.85 L 81.40,69.25 L 64.63,73.65 L 73.38,88.63 L 58.40,79.88 L 54.00,96.65 L 49.60,79.88 L 34.62,88.63 L 43.37,73.65 L 26.60,69.25 L 43.37,64.85 L 34.62,49.87 L 49.60,58.62 Z" fill="none" stroke="#cd762b" stroke-width="0.35" stroke-opacity="0.9" stroke-linejoin="miter" stroke-miterlimit="12"/>
+  <path d="M 54.00,35.55 L 59.42,56.17 L 77.83,45.42 L 67.08,63.83 L 87.70,69.25 L 67.08,74.67 L 77.83,93.08 L 59.42,82.33 L 54.00,102.95 L 48.58,82.33 L 30.17,93.08 L 40.92,74.67 L 20.30,69.25 L 40.92,63.83 L 30.17,45.42 L 48.58,56.17 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="12"/>
+  <path d="M 54.00,41.85 L 58.40,58.62 L 73.38,49.87 L 64.63,64.85 L 81.40,69.25 L 64.63,73.65 L 73.38,88.63 L 58.40,79.88 L 54.00,96.65 L 49.60,79.88 L 34.62,88.63 L 43.37,73.65 L 26.60,69.25 L 43.37,64.85 L 34.62,49.87 L 49.60,58.62 Z" fill="none" stroke="#ffc464" stroke-width="0.35" stroke-linejoin="miter" stroke-miterlimit="12"/>
   <circle cx="54.00" cy="69.25" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>
   <circle cx="54.00" cy="69.25" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>
   <!-- The singers' ring, just outside the points -->
-  <circle cx="54.00" cy="69.25" r="41.00" fill="none" stroke="#cd762b" stroke-width="0.4"/>
-  <circle cx="54.00" cy="69.25" r="51.00" fill="none" stroke="#cd762b" stroke-width="0.4"/>
+  <circle cx="54.00" cy="69.25" r="41.00" fill="none" stroke="#ffc464" stroke-width="0.4"/>
+  <circle cx="54.00" cy="69.25" r="51.00" fill="none" stroke="#ffc464" stroke-width="0.4"/>
 
   <!-- Controls frame: pitch, swarm, vowel, breath, filter, envelope -->
   <rect x="108.00" y="16.00" width="46.00" height="106.50" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
