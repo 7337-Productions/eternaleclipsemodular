@@ -69,7 +69,6 @@ struct VesperSwarm : Module {
 	std::atomic<int> law{vesper::LAW_EQUAL};
 
 	// audio -> UI
-	std::atomic<float> dispEnv{0.f};
 	std::atomic<float> dispVowel{0.f};
 	std::atomic<uint8_t> dispMask{0xFF};
 	std::atomic<float> dispLevel[VOICES];
@@ -193,7 +192,6 @@ struct VesperSwarm : Module {
 		choir.setBlock(prm, sr);
 
 		float env = choir.env.level;
-		dispEnv.store(env, std::memory_order_relaxed);
 		dispVowel.store(prm.vowel, std::memory_order_relaxed);
 		dispMask.store(mask, std::memory_order_relaxed);
 		for (int i = 0; i < VOICES; i++) {
@@ -218,7 +216,7 @@ struct VesperSwarm : Module {
 // toggles sit just beyond its points and the display breathes in its heart.
 static constexpr float STAR_X = 4.f, STAR_Y = 16.f, STAR_W = 100.f, STAR_H = 106.5f;
 static constexpr float STAR_CX = 54.f, STAR_CY = 69.25f, STAR_R = 40.f;
-static constexpr float BUTTON_R = 45.5f;
+static constexpr float BUTTON_R = 46.f; // in the ring between the SVG's circles at 41 and 51
 
 static Vec starPoint(int i, float r) {
 	float a = -0.5f * (float)M_PI + (float)i * 0.25f * (float)M_PI;
@@ -233,13 +231,12 @@ struct StarDisplay : TransparentWidget {
 	void drawLayer(const DrawArgs& args, int layer) override {
 		if (layer != 1)
 			return;
-		float env = 0.6f, vowel = 0.5f;
+		float vowel = 0.5f;
 		uint8_t mask = 0xDB; // preview: singers 3 and 6 silent
 		float level[VOICES];
 		for (int i = 0; i < VOICES; i++)
 			level[i] = 0.55f;
 		if (module) {
-			env = module->dispEnv.load(std::memory_order_relaxed);
 			vowel = module->dispVowel.load(std::memory_order_relaxed);
 			mask = module->dispMask.load(std::memory_order_relaxed);
 			for (int i = 0; i < VOICES; i++)
@@ -264,19 +261,6 @@ struct StarDisplay : TransparentWidget {
 			nvgLineTo(args.vg, p1.x, p1.y);
 			nvgStroke(args.vg);
 		}
-
-		// Glow around the bullseye, breathing with the envelope
-		float inner = mm2px(12.f);
-		float outer = mm2px(12.f + 3.f + 14.f * env);
-		float alpha = 0.08f + 0.45f * env;
-		NVGpaint paint = nvgRadialGradient(args.vg, c.x, c.y, inner, outer,
-			nvgRGBAf(1.f, 0.77f, 0.39f, alpha), nvgRGBAf(1.f, 0.77f, 0.39f, 0.f));
-		nvgBeginPath(args.vg);
-		nvgCircle(args.vg, c.x, c.y, outer);
-		nvgCircle(args.vg, c.x, c.y, inner);
-		nvgPathWinding(args.vg, NVG_HOLE);
-		nvgFillPaint(args.vg, paint);
-		nvgFill(args.vg);
 
 		// The vowel being sung
 		std::shared_ptr<Font> font = APP->window->loadFont(asset::system("res/fonts/ShareTechMono-Regular.ttf"));

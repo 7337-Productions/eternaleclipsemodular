@@ -26,6 +26,7 @@ BAY_X, BAY_W = 158.0, 41.2
 STAR_CX, STAR_CY, STAR_R = 54.0, 69.25, 40.0
 STAR_INNER = 0.42 * STAR_R      # radius of the notches between points
 STAR_INSETS = (1.6, 3.2)        # mm, the nested outlines
+RING_IN, RING_OUT = 41.0, 51.0  # the singers' ring: buttons at 46 sit between
 
 
 def f(x):
@@ -113,8 +114,10 @@ svg.append(f'  <path d="{path_of(star_polygon())}" fill="#140c06" stroke="#ffc46
 for d in STAR_INSETS:
     svg.append(f'  <path d="{path_of(star_polygon(d))}" fill="none" stroke="#cd762b" stroke-width="0.35" stroke-opacity="0.9" stroke-linejoin="miter" stroke-miterlimit="12"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>\n')
-svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="9.6" fill="none" stroke="#cd762b" stroke-width="2.2"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>\n')
+svg.append("  <!-- The singers' ring, just outside the points -->\n")
+svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="{f(RING_IN)}" fill="none" stroke="#cd762b" stroke-width="0.4"/>\n')
+svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="{f(RING_OUT)}" fill="none" stroke="#cd762b" stroke-width="0.4"/>\n')
 
 svg.append("\n  <!-- Controls frame: pitch, swarm, vowel, breath, filter, envelope -->\n")
 svg.append(frame(CTRL_X, CTRL_W))
