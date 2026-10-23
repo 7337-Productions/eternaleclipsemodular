@@ -43,6 +43,7 @@ struct Choir {
 	uint8_t mask = 0xFF;
 	bool gate = true;
 	bool envToFilter = false;
+	float baseCutoff = 20000.f, res = 0.f, rate = 48000.f; // for the per-sample cutoff
 	float mixGain = 0.f;
 	float rawPeak = 0.f; // pre-clip peak since the last read
 
@@ -95,10 +96,21 @@ struct Choir {
 		mixGain = active > 0 ? MAKEUP / std::sqrt((float)active) : 0.f;
 		env.setBlock(p.attack, p.decay, p.sustain, p.release, 1.f / sampleRate);
 		envToFilter = p.envToFilter;
-		float cutoff = p.cutoff;
+		baseCutoff = p.cutoff;
+		res = p.res;
+		rate = sampleRate;
+		updateCutoff();
+	}
+
+	// With the envelope on the filter this runs every sample, so the cutoff
+	// follows the envelope smoothly instead of stepping once per block
+	// (audible as a click on a fast attack with resonance up). The
+	// coefficient only recomputes when the cutoff actually moves.
+	void updateCutoff() {
+		float cutoff = baseCutoff;
 		if (envToFilter)
-			cutoff = clampf(cutoff * std::exp2(ENV_OCTAVES * env.level), 20.f, sampleRate * 0.45f);
-		coeffs.update(cutoff, p.res, sampleRate);
+			cutoff = clampf(cutoff * std::exp2(ENV_OCTAVES * env.level), 20.f, rate * 0.45f);
+		coeffs.update(cutoff, res, rate);
 	}
 
 	void process(float& l, float& r) {
@@ -116,6 +128,8 @@ struct Choir {
 		}
 		sl *= mixGain;
 		sr *= mixGain;
+		if (envToFilter)
+			updateCutoff();
 		sl = fltL.process(sl, coeffs, true);
 		sr = fltR.process(sr, coeffs, true);
 		float e = env.process(gate);

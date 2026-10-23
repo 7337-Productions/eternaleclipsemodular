@@ -68,11 +68,11 @@ struct Limiter {
 	}
 
 	void process(float& l, float& r) {
+		// Never let a NaN reach the speakers. Each side on its own: fmax
+		// would drop a NaN operand and pass the other side's peak.
+		if (!std::isfinite(l)) l = 0.f;
+		if (!std::isfinite(r)) r = 0.f;
 		float peak = std::fmax(std::fabs(l), std::fabs(r));
-		if (!std::isfinite(peak)) {
-			// Never let a NaN reach the speakers; the Circle guards upstream
-			l = r = peak = 0.f;
-		}
 		float gReq = peak > ceiling ? ceiling / peak : 1.f;
 
 		// Release: down at once, back up at the program-dependent rate

@@ -63,6 +63,7 @@ struct VesperSwarm : Module {
 	vesper::ChoirParams prm;
 	dsp::ClockDivider divider;
 	dsp::SchmittTrigger gateTrig;
+	bool gateHigh = true; // read every sample; GATE unpatched drones
 	float glided = 0.f;
 	bool glideInit = false;
 
@@ -122,6 +123,7 @@ struct VesperSwarm : Module {
 
 	void onReset() override {
 		glideInit = false;
+		law.store(vesper::LAW_EQUAL);
 	}
 
 	json_t* dataToJson() override {
@@ -156,11 +158,7 @@ struct VesperSwarm : Module {
 		float sr = args.sampleRate;
 		float blockDt = (float)vesper::BLOCK / sr;
 
-		bool gate = true;
-		if (inputs[GATE_INPUT].isConnected()) {
-			gateTrig.process(inputs[GATE_INPUT].getVoltage(), 0.1f, 1.f);
-			gate = gateTrig.isHigh();
-		}
+		bool gate = gateHigh;
 
 		// Pitch with glide: 5 ms .. 2 s exponential approach, off at zero
 		float target = vesper::clampf(inputs[VOCT_INPUT].getVoltage(), -10.f, 10.f) + params[PITCH_PARAM].getValue() / 12.f;
@@ -211,8 +209,17 @@ struct VesperSwarm : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
+		// The gate is read every sample so edges land where they fall and a
+		// short trigger is never lost between blocks
+		if (inputs[GATE_INPUT].isConnected()) {
+			gateTrig.process(inputs[GATE_INPUT].getVoltage(), 0.1f, 1.f);
+			gateHigh = gateTrig.isHigh();
+		}
+		else
+			gateHigh = true;
 		if (divider.process())
 			block(args);
+		choir.gate = gateHigh;
 		float l, r;
 		choir.process(l, r);
 		outputs[OUTL_OUTPUT].setVoltage(5.f * l);
