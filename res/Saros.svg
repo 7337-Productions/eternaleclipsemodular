@@ -23,19 +23,19 @@
         transform="translate(30.48 10.8)" fill="none" stroke="#ffc464" stroke-width="0.3" stroke-opacity="0.9"/>
 
   <!-- Screen bezel (curve and playhead drawn at runtime) -->
-  <rect x="3" y="18" width="54.96" height="31" rx="1.5" fill="#070302" stroke="#cd762b" stroke-width="0.35" stroke-opacity="0.6"/>
+  <rect x="3" y="18" width="54.96" height="41.5" rx="1.5" fill="#070302" stroke="#cd762b" stroke-width="0.35" stroke-opacity="0.6"/>
 
   <!-- Section frames -->
   <!-- Controls -->
-  <rect x="2.5" y="52" width="55.96" height="40" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
+  <rect x="2.5" y="62" width="55.96" height="32.5" rx="2" fill="#140c06" stroke="#382110" stroke-width="0.4"/>
   <!-- CV / IO area -->
-  <rect x="2.5" y="94" width="55.96" height="28.9" rx="2" fill="#0a0503" stroke="#382110" stroke-width="0.4"/>
+  <rect x="2.5" y="96.5" width="55.96" height="26.4" rx="2" fill="#0a0503" stroke="#382110" stroke-width="0.4"/>
 
   <!-- Corner brackets (Church card motif) -->
   <g fill="none" stroke="#cd762b" stroke-width="0.4" stroke-opacity="0.9">
-    <path d="M 2.5,54.4 L 2.5,52 L 4.9,52"/>
-    <path d="M 58.46,89.6 L 58.46,92 L 56.06,92"/>
-    <path d="M 2.5,96.4 L 2.5,94 L 4.9,94"/>
+    <path d="M 2.5,64.4 L 2.5,62 L 4.9,62"/>
+    <path d="M 58.46,92.1 L 58.46,94.5 L 56.06,94.5"/>
+    <path d="M 2.5,98.9 L 2.5,96.5 L 4.9,96.5"/>
     <path d="M 58.46,120.5 L 58.46,122.9 L 56.06,122.9"/>
   </g>
 

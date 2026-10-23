@@ -32,6 +32,13 @@
   unity, and the Triangle's circle burns with the limiter's gain
   reduction.
 - Shared panel labels (`eclipse::addLabel`) can be turned by an angle.
+- Saros: polyphonic. A POLY switch (default MONO, so existing patches are
+  unchanged) runs one envelope per channel of the TRIG input; OUT and EOC
+  carry the same channels, and TIME / SHAPE / WARP / FLUX CV are read per
+  voice, a mono CV going to every voice. The drawn shape, LOOP and the
+  knobs are shared; PUSH fires every voice. Requested in GitHub #4 by
+  MaZe6K. The panel was tightened to give the screen a third more height,
+  and the playhead is now Abyssal Harmonics red.
 
 ## 2.10.1 (2026-09-24)
 

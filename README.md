@@ -67,7 +67,16 @@ and end-of-cycle output. The screen shows the current curve, a live playhead, an
 cycle time — and it is drawable: sketch any shape on it with the mouse and the
 envelope follows your drawing (WARP and FLUX still apply). The context menu switches
 between drawn and bank shapes and clears the drawing. CV over time, shape, warp, and
-flux; bipolar ±5V output via context menu.
+flux; bipolar ±5V output via context menu. POLY runs one envelope per channel of the
+trigger input, with OUT and EOC polyphonic to match and each CV read per voice; MONO
+(the default) is the single envelope.
+
+*If polyphony in Rack is new to you:* a single cable can carry up to 16 channels, one
+per note. Right-click the Core MIDI > CV module and set **Polyphony channels** to 4 or
+more; its GATE cable becomes polyphonic (Rack draws poly cables thicker). Patch that
+gate into Saros TRIG with POLY up and OUT becomes a poly cable too: one Saros curve
+per held note, straight into a polyphonic VCA such as Fundamental VCA. Hovering a
+connected OUT jack lists the voltage of every channel.
 
 ### Sephirothic Modulator
 
