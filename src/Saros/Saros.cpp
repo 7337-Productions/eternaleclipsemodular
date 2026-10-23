@@ -13,6 +13,7 @@ struct Saros : Module {
 		FLUX_PARAM,
 		LOOP_PARAM,
 		TRIG_PARAM,
+		POLY_PARAM,
 		PARAMS_LEN
 	};
 	enum InputId {
@@ -35,15 +36,18 @@ struct Saros : Module {
 	static constexpr int NUM_SHAPES = 16;
 	static constexpr int TABLE_N = 256;
 
-	float phase = 1.f;
-	bool running = false;
+	// One envelope per channel. POLY off: channel 0 only, exactly the mono module.
+	static constexpr int MAX_CH = 16;
+	float phase[MAX_CH];
+	bool running[MAX_CH];
+	dsp::SchmittTrigger trigTrigger[MAX_CH];
+	dsp::PulseGenerator eocPulse[MAX_CH];
+	int lastChannels = 1;
 	bool bipolar = false;
 	// Hand-drawn shape: drawing on the screen fills this and switches it on
 	float drawTable[TABLE_N];
 	bool drawMode = false;
-	dsp::SchmittTrigger trigTrigger;
 	dsp::BooleanTrigger buttonTrigger;
-	dsp::PulseGenerator eocPulse;
 
 	// Effective values, read by the panel display
 	float dispShape = 0.f;
@@ -61,14 +65,25 @@ struct Saros : Module {
 		configParam(FLUX_PARAM, 0.f, 1.f, 0.f, "Flux", "%", 0.f, 100.f);
 		configSwitch(LOOP_PARAM, 0.f, 1.f, 0.f, "Loop", {"Off", "On"});
 		configButton(TRIG_PARAM, "Trigger");
+		configSwitch(POLY_PARAM, 0.f, 1.f, 0.f, "Voices", {"Mono", "Poly"});
 		configInput(TIME_INPUT, "Time CV (10V = full range)");
 		configInput(SHAPE_INPUT, "Shape CV (10V = full range)");
 		configInput(WARP_INPUT, "Warp CV (5V = full range)");
 		configInput(FLUX_INPUT, "Flux CV (10V = full range)");
-		configInput(TRIG_INPUT, "Trigger");
+		configInput(TRIG_INPUT, "Trigger (sets the voice count in POLY)");
 		configOutput(OUT_OUTPUT, "Envelope");
 		configOutput(EOC_OUTPUT, "End of cycle trigger");
 		initDrawTable();
+		resetVoices(0);
+	}
+
+	// Park voices c.. : idle at the end of the curve
+	void resetVoices(int from) {
+		for (int c = from; c < MAX_CH; c++) {
+			phase[c] = 1.f;
+			running[c] = false;
+			eocPulse[c].reset();
+		}
 	}
 
 	void initDrawTable() {
@@ -136,54 +151,69 @@ struct Saros : Module {
 	}
 
 	void process(const ProcessArgs& args) override {
-		float time = clamp(params[TIME_PARAM].getValue() + inputs[TIME_INPUT].getVoltage() / 10.f, 0.f, 1.f);
-		float shape = clamp(params[SHAPE_PARAM].getValue() + inputs[SHAPE_INPUT].getVoltage() / 10.f, 0.f, 1.f);
-		float warp = clamp(params[WARP_PARAM].getValue() + inputs[WARP_INPUT].getVoltage() / 5.f, -1.f, 1.f);
-		float flux = clamp(params[FLUX_PARAM].getValue() + inputs[FLUX_INPUT].getVoltage() / 10.f, 0.f, 1.f);
+		// POLY: one voice per TRIG channel. Mono CV is copied to every voice.
+		bool poly = params[POLY_PARAM].getValue() > 0.5f;
+		int channels = poly ? std::max(1, inputs[TRIG_INPUT].getChannels()) : 1;
+		if (channels < lastChannels)
+			resetVoices(channels);
+		lastChannels = channels;
+
 		bool loop = params[LOOP_PARAM].getValue() > 0.5f;
+		bool button = buttonTrigger.process(params[TRIG_PARAM].getValue() > 0.f);
+		const float* table = drawMode ? drawTable : NULL;
 
-		bool trig = trigTrigger.process(inputs[TRIG_INPUT].getVoltage(), 0.1f, 1.f);
-		trig |= buttonTrigger.process(params[TRIG_PARAM].getValue() > 0.f);
-		if (trig) {
-			phase = 0.f;
-			running = true;
-		}
-		else if (loop && !running) {
-			if (phase >= 1.f)
-				phase = 0.f;
-			running = true;
-		}
+		for (int c = 0; c < channels; c++) {
+			float time = clamp(params[TIME_PARAM].getValue() + inputs[TIME_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.f);
+			float shape = clamp(params[SHAPE_PARAM].getValue() + inputs[SHAPE_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.f);
+			float warp = clamp(params[WARP_PARAM].getValue() + inputs[WARP_INPUT].getPolyVoltage(c) / 5.f, -1.f, 1.f);
+			float flux = clamp(params[FLUX_PARAM].getValue() + inputs[FLUX_INPUT].getPolyVoltage(c) / 10.f, 0.f, 1.f);
 
-		float duration = 0.005f * std::pow(360000.f, time);
-		if (running) {
-			phase += args.sampleTime / duration;
-			if (phase >= 1.f) {
-				eocPulse.trigger(1e-3f);
-				if (loop) {
-					phase -= std::floor(phase);
-				}
-				else {
-					phase = 1.f;
-					running = false;
+			bool trig = trigTrigger[c].process(inputs[TRIG_INPUT].getPolyVoltage(c), 0.1f, 1.f);
+			trig |= button;
+			if (trig) {
+				phase[c] = 0.f;
+				running[c] = true;
+			}
+			else if (loop && !running[c]) {
+				if (phase[c] >= 1.f)
+					phase[c] = 0.f;
+				running[c] = true;
+			}
+
+			float duration = 0.005f * std::pow(360000.f, time);
+			if (running[c]) {
+				phase[c] += args.sampleTime / duration;
+				if (phase[c] >= 1.f) {
+					eocPulse[c].trigger(1e-3f);
+					if (loop) {
+						phase[c] -= std::floor(phase[c]);
+					}
+					else {
+						phase[c] = 1.f;
+						running[c] = false;
+					}
 				}
 			}
+
+			float v = envValue(table, shape, warp, flux, phase[c]);
+			outputs[OUT_OUTPUT].setVoltage(bipolar ? v * 10.f - 5.f : v * 10.f, c);
+			outputs[EOC_OUTPUT].setVoltage(eocPulse[c].process(args.sampleTime) ? 10.f : 0.f, c);
+
+			if (c == 0) {
+				dispShape = shape;
+				dispWarp = warp;
+				dispFlux = flux;
+				dispPhase = phase[0];
+				dispDuration = duration;
+				dispLoop = loop;
+			}
 		}
-
-		float v = envValue(drawMode ? drawTable : NULL, shape, warp, flux, phase);
-		outputs[OUT_OUTPUT].setVoltage(bipolar ? v * 10.f - 5.f : v * 10.f);
-		outputs[EOC_OUTPUT].setVoltage(eocPulse.process(args.sampleTime) ? 10.f : 0.f);
-
-		dispShape = shape;
-		dispWarp = warp;
-		dispFlux = flux;
-		dispPhase = phase;
-		dispDuration = duration;
-		dispLoop = loop;
+		outputs[OUT_OUTPUT].setChannels(channels);
+		outputs[EOC_OUTPUT].setChannels(channels);
 	}
 
 	void onReset() override {
-		phase = 1.f;
-		running = false;
+		resetVoices(0);
 		drawMode = false;
 		initDrawTable();
 	}
@@ -344,12 +374,12 @@ struct SarosDisplay : TransparentWidget {
 		nvgBeginPath(args.vg);
 		nvgMoveTo(args.vg, px, my);
 		nvgLineTo(args.vg, px, my + ch);
-		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0xee, 0xb8, 0x90));
+		nvgStrokeColor(args.vg, nvgRGBA(0xff, 0x00, 0x00, 0xa0));
 		nvgStrokeWidth(args.vg, mm2px(0.2f));
 		nvgStroke(args.vg);
 		nvgBeginPath(args.vg);
 		nvgCircle(args.vg, px, my + (1.f - pv) * ch, mm2px(0.7f));
-		nvgFillColor(args.vg, nvgRGB(0xff, 0xee, 0xb8));
+		nvgFillColor(args.vg, nvgRGB(0xff, 0x00, 0x00));
 		nvgFill(args.vg);
 
 		// Readouts
@@ -375,6 +405,7 @@ struct SarosDisplay : TransparentWidget {
 
 struct SarosWidget : ModuleWidget {
 	static constexpr float XC = 30.48f, X1 = 13.5f, X2 = 47.46f;
+	static constexpr float XL = 24.82f, XP = 36.14f; // LOOP and POLY, evenly between X1 and X2
 
 	SarosWidget(Saros* module) {
 		setModule(module);
@@ -390,29 +421,32 @@ struct SarosWidget : ModuleWidget {
 		SarosDisplay* display = new SarosDisplay;
 		display->module = module;
 		display->box.pos = mm2px(Vec(3.5f, 18.5f));
-		display->box.size = mm2px(Vec(53.96f, 30.f));
+		display->box.size = mm2px(Vec(53.96f, 40.5f));
 		addChild(display);
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X1, 60.f)), module, Saros::TIME_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(XC, 60.f)), module, Saros::SHAPE_PARAM));
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X2, 60.f)), module, Saros::WARP_PARAM));
-		eclipse::addLabel(this, Vec(X1, 68.f), "TIME", eclipse::LABEL_SIZE);
-		eclipse::addLabel(this, Vec(XC, 68.f), "SHAPE", eclipse::LABEL_SIZE);
-		eclipse::addLabel(this, Vec(X2, 68.f), "WARP", eclipse::LABEL_SIZE);
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X1, 69.f)), module, Saros::TIME_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(XC, 69.f)), module, Saros::SHAPE_PARAM));
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X2, 69.f)), module, Saros::WARP_PARAM));
+		eclipse::addLabel(this, Vec(X1, 76.2f), "TIME", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(XC, 76.2f), "SHAPE", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(X2, 76.2f), "WARP", eclipse::LABEL_SIZE);
 
-		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X1, 78.f)), module, Saros::FLUX_PARAM));
-		addParam(createParamCentered<CKSS>(mm2px(Vec(XC, 78.f)), module, Saros::LOOP_PARAM));
-		addParam(createParamCentered<VCVButton>(mm2px(Vec(X2, 78.f)), module, Saros::TRIG_PARAM));
-		eclipse::addLabel(this, Vec(X1, 86.f), "FLUX", eclipse::LABEL_SIZE);
-		eclipse::addLabel(this, Vec(XC, 86.f), "LOOP", eclipse::LABEL_SIZE);
-		eclipse::addLabel(this, Vec(X2, 86.f), "PUSH", eclipse::LABEL_SIZE);
+		// Second row is four wide: the two switches share the middle
+		addParam(createParamCentered<RoundBlackKnob>(mm2px(Vec(X1, 84.f)), module, Saros::FLUX_PARAM));
+		addParam(createParamCentered<CKSS>(mm2px(Vec(XL, 84.f)), module, Saros::LOOP_PARAM));
+		addParam(createParamCentered<CKSS>(mm2px(Vec(XP, 84.f)), module, Saros::POLY_PARAM));
+		addParam(createParamCentered<VCVButton>(mm2px(Vec(X2, 84.f)), module, Saros::TRIG_PARAM));
+		eclipse::addLabel(this, Vec(X1, 91.2f), "FLUX", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(XL, 91.2f), "LOOP", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(XP, 91.2f), "POLY", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(X2, 91.2f), "PUSH", eclipse::LABEL_SIZE);
 
-		eclipse::addLabel(this, Vec(X1, 97.5f), "TIME", eclipse::LABEL_SIZE);
-		eclipse::addLabel(this, Vec(XC, 97.5f), "SHAPE", eclipse::LABEL_SIZE);
-		eclipse::addLabel(this, Vec(X2, 97.5f), "WARP", eclipse::LABEL_SIZE);
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(X1, 103.5f)), module, Saros::TIME_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(XC, 103.5f)), module, Saros::SHAPE_INPUT));
-		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(X2, 103.5f)), module, Saros::WARP_INPUT));
+		eclipse::addLabel(this, Vec(X1, 99.7f), "TIME", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(XC, 99.7f), "SHAPE", eclipse::LABEL_SIZE);
+		eclipse::addLabel(this, Vec(X2, 99.7f), "WARP", eclipse::LABEL_SIZE);
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(X1, 105.5f)), module, Saros::TIME_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(XC, 105.5f)), module, Saros::SHAPE_INPUT));
+		addInput(createInputCentered<PJ301MPort>(mm2px(Vec(X2, 105.5f)), module, Saros::WARP_INPUT));
 
 		eclipse::addLabel(this, Vec(9.5f, 112.5f), "TRIG", eclipse::LABEL_SIZE);
 		eclipse::addLabel(this, Vec(23.5f, 112.5f), "FLUX", eclipse::LABEL_SIZE);
