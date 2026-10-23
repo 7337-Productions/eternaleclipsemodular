@@ -223,7 +223,7 @@ struct ElementalRevelator : Module {
 		configParam(CUTOFF_ATT_PARAM, -1.f, 1.f, 0.f, "Cutoff CV amount", "%", 0.f, 100.f);
 		configParam(RES_ATT_PARAM, -1.f, 1.f, 0.f, "Resonance CV amount", "%", 0.f, 100.f);
 
-		configInput(VOCT_INPUT, "1V/octave pitch");
+		configInput(VOCT_INPUT, "1V/octave pitch (poly with Spirit off: channels 1-4 play Air, Water, Earth, Fire)");
 		configInput(SIGIL_INPUT, "Sigil CV");
 		configInput(VEIL_INPUT, "Veil CV");
 		configInput(RITE_INPUT, "Rite CV");
@@ -317,6 +317,15 @@ struct ElementalRevelator : Module {
 		bool spiritOn = params[SPIRIT_MODE_PARAM].getValue() > 0.5f;
 		lights[SPIRIT_LIGHT].setBrightness(spiritOn ? 1.f : 0.f);
 		float voct = inputs[VOCT_INPUT].getVoltage() * params[VOCT_ATT_PARAM].getValue();
+		// Spirit off: a poly V/OCT gives each element its own channel (AIR 1,
+		// WATER 2, EARTH 3, FIRE 4); with fewer channels the elements wrap
+		// round the ones there are, so a mono cable moves all four together
+		float elemVoct[4] = {voct, voct, voct, voct};
+		int voctChannels = inputs[VOCT_INPUT].getChannels();
+		if (!spiritOn && voctChannels > 1) {
+			for (int i = 0; i < 4; i++)
+				elemVoct[i] = inputs[VOCT_INPUT].getVoltage(i % voctChannels) * params[VOCT_ATT_PARAM].getValue();
+		}
 
 		float targetSemi[4];
 		float veilDetuneScale = 1.f;
@@ -350,7 +359,7 @@ struct ElementalRevelator : Module {
 		float freq[4];
 		for (int i = 0; i < 4; i++) {
 			float detuneSemi = veil * cfg.detuneScale * 5.f * DETUNE_COEF[i] * veilDetuneScale + varDetune[i];
-			freq[i] = dsp::FREQ_C4 * std::pow(2.f, slewedSemi[i] / 12.f + voct + detuneSemi / 12.f);
+			freq[i] = dsp::FREQ_C4 * std::pow(2.f, slewedSemi[i] / 12.f + elemVoct[i] + detuneSemi / 12.f);
 			freq[i] = clampf(freq[i], 0.1f, args.sampleRate * 0.25f);
 		}
 
