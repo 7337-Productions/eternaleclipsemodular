@@ -30,6 +30,11 @@ STAR_CX, STAR_CY, STAR_R = 59.0, 64.0, 42.5
 STAR_INNER = 0.42 * STAR_R      # radius of the notches of the eight-point silhouette
 STAR_INSETS = (1.4, 2.8, 4.2)   # mm, the nested bands of each four-pointed star
 STAR_EDGE_W, STAR_BAND_W = 0.35, 0.22  # mm; much under 0.25 fades at 100% zoom
+# Colours, as the Conclave's Circle: title gold for the star's edges, seals
+# and phases; structural copper for the moon's outline (the Circle's rings);
+# line brown for the star's inner bands (the hexagram at the Circle's heart)
+GOLD, COPPER, LINE = "#ffc464", "#cd762b", "#6b4522"
+MOON_W = 0.45                   # the Circle's ring weight
 
 # The crescent under the star: a thin moon cradling it, centred on the
 # star's axis. Its inner edge is the circle through the star's tips, so
@@ -226,7 +231,7 @@ svg.append(glyph)
 
 svg.append("\n  <!-- The crescent moon the star rests in, its points touching the inner\n"
            "       edge, the eight phases carved along it -->\n")
-svg.append(f'  <path d="{crescent_path()}" fill="#140c06" stroke="#ffc464" stroke-width="{STAR_EDGE_W}" stroke-linejoin="round"/>\n')
+svg.append(f'  <path d="{crescent_path()}" fill="#140c06" stroke="{COPPER}" stroke-width="{MOON_W}" stroke-linejoin="round"/>\n')
 svg.append(moon_phases())
 
 svg.append("\n  <!-- The star of Ishtar: the eight singers stand between its points.\n"
@@ -234,7 +239,7 @@ svg.append("\n  <!-- The star of Ishtar: the eight singers stand between its poi
 for rot in (-45.0, -90.0):
     svg.append(f'  <path d="{path_of(star_polygon(rot))}" fill="#140c06" stroke="#ffc464" stroke-width="{STAR_EDGE_W}" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
     for d in STAR_INSETS:
-        svg.append(f'  <path d="{path_of(star_polygon(rot, d))}" fill="none" stroke="#ffc464" stroke-width="{STAR_BAND_W}" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
+        svg.append(f'  <path d="{path_of(star_polygon(rot, d))}" fill="none" stroke="{LINE}" stroke-width="{STAR_BAND_W}" stroke-linejoin="miter" stroke-miterlimit="16"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="11.6" fill="#000000" stroke="#ffc464" stroke-width="0.5"/>\n')
 svg.append(f'  <circle cx="{f(STAR_CX)}" cy="{f(STAR_CY)}" r="7.0" fill="none" stroke="#ffc464" stroke-width="0.4"/>\n')
 
