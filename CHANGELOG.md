@@ -11,8 +11,9 @@
   BREATH adds air, then a saturating 4-pole lowpass and a gate-driven
   ADSR (attack to 60 s) that drones unpatched and can be pointed at the
   filter instead of the level. GLIDE for ribbon glissandi, V/OCT plus a
-  CV jack for every knob. The singers stand on the points of an
-  eight-pointed star; a click silences or wakes one.
+  CV jack for every knob. The singers stand between the points of an
+  eight-pointed star hung in the crescent moon; a click silences or wakes
+  one.
 - New module: Conclave of Hollow Radiance — a four-channel stereo VCA
   mixer that is a plain mixer at rest and a feedback instrument when
   pushed. Veils-style chaining (an unpatched OUT passes the channel down;

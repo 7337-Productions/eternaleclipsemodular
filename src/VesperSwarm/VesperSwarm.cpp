@@ -221,13 +221,16 @@ struct VesperSwarm : Module {
 };
 
 // Panel geometry (mm). The star of Ishtar is drawn in the SVG; the singers'
-// toggles sit just beyond its points and the display breathes in its heart.
+// toggles sit between its points and the display breathes in its heart.
 static constexpr float STAR_X = 4.f, STAR_Y = 14.f, STAR_W = 110.f, STAR_H = 111.f;
-static constexpr float STAR_CX = 59.f, STAR_CY = 69.6f, STAR_R = 42.5f;
-static constexpr float BUTTON_R = 48.5f; // in the ring between the SVG's circles at 43.5 and 53.5
+static constexpr float STAR_CX = 59.f, STAR_CY = 64.f, STAR_R = 42.5f;
+static constexpr float BUTTON_R = 30.f;  // midway out along the gap between two points
+static constexpr float BEZEL_R = 3.6f;   // VCVLightBezel; the ray stops RAY_GAP short of it
+static constexpr float RAY_GAP = 1.f;
 
-static Vec starPoint(int i, float r) {
-	float a = -0.5f * (float)M_PI + (float)i * 0.25f * (float)M_PI;
+// Singer i stands in the gap after point i, half a step round from the tip
+static Vec singerPoint(int i, float r) {
+	float a = -0.5f * (float)M_PI + ((float)i + 0.5f) * 0.25f * (float)M_PI;
 	return Vec(STAR_CX + r * std::cos(a), STAR_CY + r * std::sin(a));
 }
 
@@ -255,14 +258,15 @@ struct StarDisplay : TransparentWidget {
 		nvgScissor(args.vg, 0, 0, box.size.x, box.size.y);
 		Vec c = mm2px(Vec(STAR_CX - STAR_X, STAR_CY - STAR_Y));
 
-		// Rays along the points of the singing voices
+		// Rays from the heart out through the notches to the singing voices,
+		// stopping short of each singer's button
 		nvgStrokeWidth(args.vg, mm2px(0.8f));
 		nvgLineCap(args.vg, NVG_ROUND);
 		for (int i = 0; i < VOICES; i++) {
 			if (!((mask >> i) & 1u))
 				continue;
-			Vec p0 = mm2px(starPoint(i, 13.f).minus(Vec(STAR_X, STAR_Y)));
-			Vec p1 = mm2px(starPoint(i, STAR_R - 3.f).minus(Vec(STAR_X, STAR_Y)));
+			Vec p0 = mm2px(singerPoint(i, 13.f).minus(Vec(STAR_X, STAR_Y)));
+			Vec p1 = mm2px(singerPoint(i, BUTTON_R - BEZEL_R - RAY_GAP).minus(Vec(STAR_X, STAR_Y)));
 			// Abyssal Harmonics red, like the Syzygy beads: each ray breathes
 			// with its own singer's loudness
 			nvgStrokeColor(args.vg, nvgRGBAf(1.f, 0.f, 0.f, 0.1f + 0.8f * level[i]));
@@ -326,7 +330,7 @@ struct VesperSwarmWidget : ModuleWidget {
 		addChild(display);
 		for (int i = 0; i < VOICES; i++)
 			addParam(createLightParamCentered<eclipse::LightButton>(
-				mm2px(starPoint(i, BUTTON_R)), module, VesperSwarm::VOICE_PARAMS + i, VesperSwarm::VOICE_LIGHTS + i));
+				mm2px(singerPoint(i, BUTTON_R)), module, VesperSwarm::VOICE_PARAMS + i, VesperSwarm::VOICE_LIGHTS + i));
 
 		// ===== Voice box =====
 		addParam(createParamCentered<RoundBigBlackKnob>(mm2px(Vec(KX_L, 30.f)), module, VesperSwarm::PITCH_PARAM));
