@@ -36,7 +36,7 @@
       "slug": "Saros",
       "name": "Saros",
       "description": "Envelope and modulation generator — morphing shape bank, mouse-drawable screen with playhead, time warp and flux, 5 ms to 30 minutes.",
-      "tags": ["Envelope generator", "LFO", "Function generator"]
+      "tags": ["Envelope generator", "LFO", "Function generator", "Polyphonic"]
     },
     {
       "slug": "SephirothicModulator",
