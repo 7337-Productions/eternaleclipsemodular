@@ -19,6 +19,7 @@
 #include <memory>
 #include <algorithm>
 #include <initializer_list>
+#include <limits>
 
 using namespace conclave;
 
@@ -251,7 +252,7 @@ static void checkStress() {
 		p.master = 1.f;
 		c.limiter.ceiling = k.ceiling;
 		c.set(p);
-	c.reset(RATE); // delays start at their targets
+		c.reset(RATE); // delays start at their targets
 		Rng rng;
 		int total = (int)(60 * RATE);
 		int tail = (int)(30 * RATE);
@@ -271,7 +272,6 @@ static void checkStress() {
 			if (i % 4800 == 0) {
 				p.tuneHz[0] = 20.f + 1980.f * (0.5f + 0.5f * rng.next());
 				c.set(p);
-	c.reset(RATE); // delays start at their targets
 			}
 			CircleOut out;
 			c.process(in, out);
@@ -365,10 +365,65 @@ static void checkCpu() {
 	std::printf("cpu: %.3f us/sample, %.2f%% of one core at 48 kHz (sink %g)\n", perSample, perSample * RATE / 1e4, sink);
 }
 
+// ---- 3b. poison: NaN and Inf from upstream are dropped, nothing sticks ----
+// One bad sample on an input, on a closed channel, and on one side of the
+// return; afterwards the ring must be clean and still pass a signal.
+static void checkPoison() {
+	struct Case { const char* name; float feed; bool loop; };
+	const Case cases[] = {
+		{"feeds at noon", 0.f, false},
+		{"feeds past unity, LOOP", 1.2f, true},
+	};
+	const float nan = std::numeric_limits<float>::quiet_NaN();
+	const float inf = std::numeric_limits<float>::infinity();
+	for (const Case& k : cases) {
+		auto cPtr = std::make_unique<Circle>();
+		Circle& c = *cPtr;
+		c.reset(RATE);
+		CircleParams p;
+		for (int n = 0; n < CHANNELS; n++) {
+			p.level[n] = n == 1 ? 0.f : 1.f; // channel 2 closed: Inf * 0
+			p.feed[n] = k.feed;
+		}
+		p.loopReturn = k.loop;
+		p.ret = 1.f;
+		p.master = 1.f;
+		c.set(p);
+		c.reset(RATE);
+		int total = (int)(2 * RATE);
+		bool finite = true;
+		double rms = 0.0;
+		int counted = 0;
+		for (int i = 0; i < total; i++) {
+			CircleIn in;
+			in.in[0].l = in.in[0].r = 1.f;
+			if (i == 100) in.in[2].l = nan;
+			if (i == 200) in.in[1].l = inf;
+			if (i == 300) in.ret.r = nan;
+			if (i == 400) in.in[3].l = -inf;
+			CircleOut out;
+			c.process(in, out);
+			for (int n = 0; n < CHANNELS; n++)
+				if (!std::isfinite(out.out[n].l) || !std::isfinite(out.out[n].r)) finite = false;
+			if (!std::isfinite(out.master.l) || !std::isfinite(out.master.r)) finite = false;
+			if (!std::isfinite(out.send.l) || !std::isfinite(out.send.r)) finite = false;
+			if (i >= total - (int)RATE) {
+				rms += (double)out.master.l * out.master.l;
+				counted++;
+			}
+		}
+		rms = std::sqrt(rms / counted);
+		std::printf("poison [%s]: finite %s, master rms after %.3f V (want > 0.5)\n", k.name, finite ? "yes" : "NO", rms);
+		if (!finite) fail("NaN or Inf reached an output");
+		if (rms < 0.5) fail("the ring did not recover from a bad sample");
+	}
+}
+
 int main() {
 	checkLimiter();
 	checkPlainMixer();
 	checkRing();
+	checkPoison();
 	checkStress();
 	checkCpu();
 	if (!ok) {

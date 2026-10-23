@@ -233,7 +233,18 @@ struct Circle {
 		}
 	}
 
-	void process(const CircleIn& in, CircleOut& out) {
+	static float finiteOrZero(float v) { return std::isfinite(v) ? v : 0.f; }
+	static Frame finiteOrZero(Frame f) { return {finiteOrZero(f.l), finiteOrZero(f.r)}; }
+
+	void process(const CircleIn& raw, CircleOut& out) {
+		// A NaN or Inf from upstream must never reach a comb: its filter state
+		// would hold it for good, and NaN * 0 is NaN, so even a FEED at noon
+		// would carry it round the ring. Drop the sample instead.
+		CircleIn in;
+		for (int n = 0; n < CHANNELS; n++)
+			in.in[n] = finiteOrZero(raw.in[n]);
+		in.ret = finiteOrZero(raw.ret);
+
 		// Read every comb first: comb N delivers into channel N-1, channel 1's into channel 4
 		Frame fb[CHANNELS];
 		for (int n = 0; n < CHANNELS; n++)

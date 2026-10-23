@@ -232,9 +232,10 @@ apart, and SWARM fans them out in equal semitone steps until the outer voices
 sit an octave either side. A menu option switches the swarm law to Harmonic,
 where the singers spread into whole-number multiples of the pitch the way the
 original's eight oscillators did. Each singer has her own vocal tract, vibrato
-and place in the stereo field, and stands on a point of the eight-pointed star
-of the evening sky: click a point to silence or wake her, and the rays in the
-star glow with the voices that are singing.
+and place in the stereo field, and stands between two points of the
+eight-pointed star of the evening sky, which hangs in the crescent moon: click
+a singer to silence or wake her, and the rays from the heart of the star glow
+toward the voices that are singing.
 
 Every voice is a band-limited glottal pulse through a five-formant soprano
 filter bank. VOWEL morphs the bank through A, E, I, O and U, with the current
