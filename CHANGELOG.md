@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 2.11.0 (2026-10-23)
 
 - New module: Vesper Swarm — eight-voice formant choir in the shape of
   the Dewanatron Swarmatron. Eight soprano singers, each a band-limited
