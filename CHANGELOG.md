@@ -39,6 +39,10 @@
   knobs are shared; PUSH fires every voice. Requested in GitHub #4 by
   MaZe6K. The panel was tightened to give the screen a third more height,
   and the playhead is now Abyssal Harmonics red.
+- Elemental Revelator: polyphonic V/OCT with SPIRIT off. Channels 1-4
+  play AIR, WATER, EARTH and FIRE, each still offset by its pitch knob;
+  with fewer than four channels the elements wrap round the ones there
+  are, so a mono cable behaves as before. SPIRIT on reads channel 1.
 
 ## 2.10.1 (2026-09-24)
 

@@ -28,6 +28,10 @@ smoothly and scannable by CV; a 64-step OMEN knob dials deterministic variations
 The voice runs through a classic 4-pole ladder lowpass (CUTOFF/RES, self-oscillates)
 into a stereo delay/diffusion processor with a frequency shifter in the feedback
 path (TIME/FEED/MIX). Sixteen CV inputs with attenuverters cover every gesture.
+With SPIRIT off, a polyphonic V/OCT cable plays the elements as four voices: channels
+1–4 go to AIR, WATER, EARTH and FIRE (each still offset by its pitch knob — set all
+four alike to hear the chord as played), and with fewer than four channels the
+elements wrap round the ones there are. With SPIRIT on, V/OCT reads channel 1.
 
 ### Moon Phase Distortion
 
